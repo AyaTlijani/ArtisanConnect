@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Réservation{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Modifier la Réservation</h5>
+            {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <button class="btn btn-primary">Enregistrer</button>
+            {{ form_end(form) }}
+            <a href="{{ path('app_reservation_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+        </div>
+    </div>
+{% endblock %}

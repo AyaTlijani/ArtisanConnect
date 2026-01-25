@@ -1,0 +1,13 @@
+vich_uploader:
+    db_driver: orm
+    storage: file_system
+    mappings:
+        atelier_image:
+            uri_prefix: /uploads/ateliers
+            upload_destination: '%images_directory%/ateliers'
+            namer: Vich\UploaderBundle\Naming\OrignameNamer
+        
+        produit_image:
+            uri_prefix: /uploads/produits
+            upload_destination: 'C:\Users\badii\Desktop\PI 3E\SAMAA SYMFO\aatriii\public\uploads\produits'
+            namer: Vich\UploaderBundle\Naming\OrignameNamer

@@ -1,0 +1,40 @@
+{% if orders is defined and orders|length > 0 %}
+    {% for order in orders %}
+        <tr>
+            <td>{{ order.orderId }}</td>
+            <td>{{ order.deliveryDate|date('d/m/Y') }}</td>
+            <td>
+                <span class="badge 
+                    {% if order.commande.statut == 'En préparation' %}bg-warning
+                    {% elseif order.commande.statut == 'En livraison' %}bg-info
+                    {% elseif order.commande.statut == 'Livrée' %}bg-success
+                    {% elseif order.commande.statut == 'Annulée' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {{ order.commande.statut }}
+                </span>
+            </td>
+            <td>{{ order.totalPrice|number_format(2, ',', ' ') }} TND</td>
+            <td>
+                {% if not isArtisanView|default(false) and order.commande.statut == 'En préparation' %}
+                    <form action="{{ path('app_commande_assign_livreur', {'id': order.commande.id}) }}" method="post" class="d-inline">
+                        <input type="hidden" name="_token" value="{{ csrf_token('assign_livreur' ~ order.commande.id) }}">
+                        <select name="livreur_id" class="form-control mb-2" required>
+                            {% for livreur in livreurs %}
+                                <option value="{{ livreur.id }}">{{ livreur.username }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Assigner Livreur</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+{% else %}
+    <tr>
+        <td colspan="5" class="text-center">
+            <div class="alert alert-info">
+                Aucune commande trouvée.
+            </div>
+        </td>
+    </tr>
+{% endif %}

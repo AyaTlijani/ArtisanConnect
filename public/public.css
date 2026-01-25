@@ -1,0 +1,11 @@
+body { font-family: Arial, sans-serif; }
+nav { background: #007bff; color: white; padding: 10px; }
+nav ul { list-style: none; margin: 0; padding: 0; }
+nav ul li { display: inline; margin-right: 10px; }
+nav ul li a { color: white; text-decoration: none; }
+.container { margin: 20px; }
+.event { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+.event h2 { margin-top: 0; }
+.btn { padding: 5px 10px; text-decoration: none; border-radius: 4px; }
+.btn-info { background: #17a2b8; color: white; }
+.btn-secondary { background: #6c757d; color: white; }

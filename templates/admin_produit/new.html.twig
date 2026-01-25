@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Product{% endblock %}
+
+{% block body %}
+    <div class="product-form-container">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Add New Product</h4>
+
+                {# Display flash messages #}
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+
+                {# Display form-level errors #}
+                {% if form_errors(form) %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ form_errors(form) }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+
+                {{ form_start(form, {'attr': {'class': 'product-form'}}) }}
+                    <div class="form-group">
+                        {{ form_label(form.nom, 'Product Name', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Enter product name'}}) }}
+                        {% if form_errors(form.nom) %}
+                            <div class="invalid-feedback">{{ form_errors(form.nom) }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '4', 'placeholder': 'Enter product description'}}) }}
+                        {% if form_errors(form.description) %}
+                            <div class="invalid-feedback">{{ form_errors(form.description) }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.prix, 'Price (TND)', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.prix, {'attr': {'class': 'form-control', 'placeholder': 'Enter price', 'step': '0.01'}}) }}
+                        {% if form_errors(form.prix) %}
+                            <div class="invalid-feedback">{{ form_errors(form.prix) }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.quantite, 'Quantity', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.quantite, {'attr': {'class': 'form-control', 'placeholder': 'Enter quantity'}}) }}
+                        {% if form_errors(form.quantite) %}
+                            <div class="invalid-feedback">{{ form_errors(form.quantite) }}</div>
+                        {% endif %}
+                    </div>
+
+<div class="form-group">
+    {{ form_label(form.categorie, 'Category', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.categorie, {'attr': {'class': 'form-control'}}) }}
+    {% if form_errors(form.categorie) %}
+        <div class="invalid-feedback">{{ form_errors(form.categorie) }}</div>
+    {% endif %}
+</div>
+
+                    <div class="form-group">
+                        {{ form_label(form.imageFile, 'Product Image', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                        {% if form_errors(form.imageFile) %}
+                            <div class="invalid-feedback">{{ form_errors(form.imageFile) }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.disponibilite, 'Available', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.disponibilite, {'attr': {'class': 'form-check-input'}}) }}
+                        {% if form_errors(form.disponibilite) %}
+                            <div class="invalid-feedback">{{ form_errors(form.disponibilite) }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.idArtisan, 'Fournisseur', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.idArtisan, {'attr': {'class': 'form-control'}}) }}
+                        {% if form_errors(form.idArtisan) %}
+                            <div class="invalid-feedback">{{ form_errors(form.idArtisan) }}</div>
+                        {% endif %}
+                    </div>
+
+                    {# Hidden fields or other fields #}
+                    {{ form_rest(form) }}
+
+                    <button type="submit" class="btn btn-primary">Create Product</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

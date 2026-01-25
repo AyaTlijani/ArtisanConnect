@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Événements{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <h1 class="mb-4">Liste des Événements</h1>
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                    {{ message|raw }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in pagination %}
+                    <tr>
+                        <td>{{ event.name }}</td>
+                        <td>{{ event.date ? event.date|date('Y-m-d') : '' }}</td>
+                        <td>
+                            <span class="badge bg-{{ event.status == 'Upcoming' ? 'info' : (event.status == 'Ongoing' ? 'warning' : (event.status == 'Completed' ? 'success' : 'danger')) }}">
+                                {{ event.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_event_show', {'id': event.idEvent}) }}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{{ path('admin_event_edit', {'id': event.idEvent}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                            <form method="post" action="{{ path('admin_event_delete', {'id': event.idEvent}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.idEvent) }}">
+                                <button class="btn btn-sm btn-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">Aucun événement trouvé</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ knp_pagination_render(pagination) }}
+        <a href="{{ path('admin_event_new') }}" class="btn btn-primary">Créer un nouvel événement</a>
+    </div>
+{% endblock %}

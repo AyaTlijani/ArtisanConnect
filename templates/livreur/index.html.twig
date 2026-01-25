@@ -1,0 +1,88 @@
+{% extends 'livreur/base.html.twig' %}
+
+{% block page_title %}Gestion des Livreurs{% endblock %}
+{% block breadcrumb_active %}Liste des Livreurs{% endblock %}
+
+{% block livreur_content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Liste des Livreurs</h5>
+                    <a href="{{ path('app_livreur_new') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i> Ajouter un Livreur
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nom</th>
+                                    <th>Véhicule</th>
+                                    <th>Statut</th>
+                                    <th>Date d'ajout</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for livreur in livreurs %}
+                                    <tr>
+                                        <td>{{ livreur.id }}</td>
+                                        <td>{{ livreur.nom }}</td>
+                                        <td>{{ livreur.vehicule }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ livreur.disponible ? 'success' : 'danger' }} availability-badge">
+                                                {{ livreur.disponible ? 'Disponible' : 'Indisponible' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ livreur.createdAt|date('d/m/Y H:i') }}</td>
+                                        <td class="table-actions text-end">
+                                            <a href="{{ path('app_livreur_edit', {'id': livreur.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary me-1"
+                                               data-bs-toggle="tooltip" 
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_livreur_delete', {'id': livreur.id}) }}" 
+                                                  class="d-inline" 
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce livreur ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ livreur.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        data-bs-toggle="tooltip" 
+                                                        title="Supprimer">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="fas fa-truck fa-3x d-block mb-2"></i>
+                                            Aucun livreur enregistré pour le moment
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

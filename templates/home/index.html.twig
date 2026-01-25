@@ -1,0 +1,610 @@
+{% extends 'baseF.html.twig' %}
+
+{% block title %}Aarti - Accueil
+{% endblock %}
+
+{% block body %}
+	<!-- Hero Section -->
+	<div class="banner_section">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="banner_taital_main">
+						<h1 class="banner_taital mt-5">Bienvenue chez AartisanConnect</h1>
+						<p class="tasty_text">Découvrez nos produits et ateliers créatifs</p>
+						<p class="banner_text">Explorez notre sélection de produits artisanaux uniques et d'ateliers enrichissants</p>
+					</div>
+				</div>
+				<div class="col-md-6 mt-5">
+					<div class="banner_img">
+						<img src="{{ asset('assetsF/images/pottery.jpg') }}" alt="Artisanat Tunisien">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Ateliers Slider Section -->
+	<div class="coffee_section layout_padding">
+		<div class="container">
+			<div class="row">
+				<h1 class="coffee_taital">Nos Ateliers</h1>
+				<div class="bulit_icon"><img src="{{ asset('assetsF/images/bulit-icon.png') }}" alt=""></div>
+			</div>
+			<div class="coffee_section_2">
+				<div class="swiper atelier-slider">
+					<div class="swiper-wrapper">
+						{% if ateliers|length > 0 %}
+							{% for atelier in ateliers %}
+								<div class="swiper-slide">
+									<div class="atelier-card">
+										<div class="atelier-image">
+											<img src="{{ asset('uploads/ateliers/' ~ atelier.image) }}" alt="{{ atelier.nom }}" onerror="this.src='{{ asset('assetsF/images/pottery.jpg') }}'">
+										</div>
+										<div class="atelier-content">
+											<h3>{{ atelier.nom }}</h3>
+											<p class="price">{{ atelier.prix }}
+												TND</p>
+											{% include 'components/_rating_stars.html.twig' with {'entity': atelier, 'entityType': 'atelier'} %}
+											<p class="description mt-2">{{ atelier.description|length > 100 ? atelier.description|slice(0, 100) ~ '...' : atelier.description }}</p>
+											<div class="read_bt">
+												<a href="{{ path('app_atelier_show', {'idAtelier': atelier.getIdAtelier()}) }}">Découvrir</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						{% else %}
+							<div class="col-12 text-center">
+								<p>Aucun atelier disponible pour le moment.</p>
+							</div>
+						{% endif %}
+					</div>
+					{% if ateliers|length > 1 %}
+						<div class="swiper-button-next"></div>
+						<div class="swiper-button-prev"></div>
+						<div class="swiper-pagination"></div>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Products Slider Section -->
+			<div class="row mb-4">
+				<div class="col-md-6">
+					<h1 class="coffee_taital">Nos Produits</h1>
+					<div class="bulit_icon"><img src="{{ asset('assetsF/images/bulit-icon.png') }}" alt=""></div>
+				</div>
+				<div class="col-md-6 text-end">
+					<a href="{{ path('app_shop_index') }}" class="btn btn-outline-primary">Voir tout</a>
+				</div>
+			</div>
+			<div class="coffee_section_2">
+				<div class="swiper product-slider">
+					<div class="swiper-wrapper">
+						{% if produits is defined and produits|length > 0 %}
+							{% for produit in produits %}
+								<div class="swiper-slide">
+									<div class="product-card">
+										<div class="product-image">
+											<img src="{{ produit.image ? asset('uploads/produits/' ~ produit.image) : asset('assets/images/1.jpg') }}" alt="{{ produit.nom }}" onerror="this.src='{{ asset('assets/images/1.jpg') }}'">
+											{% if not produit.disponibilite %}
+												<span class="badge bg-danger">Épuisé</span>
+											{% endif %}
+										</div>
+										<div class="product-content">
+											<h3>{{ produit.nom }}</h3>
+											<div class="price_1">{{ produit.prix }}
+												TND</div>
+											{% include 'components/_rating_stars.html.twig' with {'entity': produit, 'entityType': 'produit'} %}
+											<p class="tasting_text">{{ produit.description|length > 100 ? produit.description|slice(0, 100) ~ '...' : produit.description }}</p>
+											<div class="product-actions">
+												<a href="{{ path('app_shop_show', {'idProduit': produit.idProduit}) }}" class="btn btn-outline-primary btn-sm">Voir détails</a>
+												{% if produit.disponibilite %}
+													<form action="{{ path('app_cart_add', {'id': produit.idProduit}) }}" method="post" class="add-to-cart-form d-inline">
+														<input type="hidden" name="quantity" value="1">
+														<button type="submit" class="btn btn-primary btn-sm" data-name="{{ produit.nom }}">
+															<i class="fas fa-shopping-cart me-1"></i>
+															Ajouter
+														</button>
+													</form>
+												{% else %}
+													<button class="btn btn-secondary btn-sm" disabled>Indisponible</button>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						{% else %}
+							<div class="col-12 text-center">
+								<p>Aucun produit disponible pour le moment.</p>
+							</div>
+						{% endif %}
+					</div>
+					{% if produits is defined and produits|length > 1 %}
+						<div class="swiper-button-next"></div>
+						<div class="swiper-button-prev"></div>
+						<div class="swiper-pagination"></div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block stylesheets %}
+	<style>
+		/* Common slider styles */
+		.swiper {
+			width: 100%;
+			padding: 20px 0;
+			position: relative;
+		}
+
+		/* Card styles */
+		.atelier-card,
+		.product-card,
+		.event-card {
+			background: #fff;
+			border: 1px solid #eee;
+			border-radius: 8px;
+			overflow: hidden;
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			margin-bottom: 20px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		}
+
+		.atelier-card:hover,
+		.product-card:hover,
+		.event-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+		}
+
+		/* Image container */
+		.atelier-image,
+		.product-image,
+		.event-image {
+			position: relative;
+			height: 200px;
+			overflow: hidden;
+		}
+
+		.atelier-image img,
+		.product-image img,
+		.event-image img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 0.3s ease;
+		}
+
+		.atelier-card:hover .atelier-image img,
+		.product-card:hover .product-image img,
+		.event-card:hover .event-image img {
+			transform: scale(1.05);
+		}
+
+		/* Date badge for events */
+		.event-date {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: rgba(0, 0, 0, 0.7);
+			color: white;
+			padding: 8px 12px;
+			border-radius: 4px;
+			text-align: center;
+			line-height: 1.2;
+			z-index: 1;
+		}
+
+		.event-date .day {
+			display: block;
+			font-size: 20px;
+			font-weight: bold;
+		}
+
+		.event-date .month {
+			display: block;
+			font-size: 12px;
+			text-transform: uppercase;
+		}
+
+		/* Content area */
+		.atelier-content,
+		.product-content,
+		.event-content {
+			padding: 20px;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.atelier-content h3,
+		.product-content h3,
+		.event-content h3 {
+			font-size: 18px;
+			margin-bottom: 10px;
+			color: #333;
+			font-weight: 600;
+		}
+
+		/* Price and time */
+		.price,
+		.event-time {
+			color: #666;
+			font-weight: 500;
+			margin-bottom: 8px;
+			font-size: 16px;
+		}
+
+		/* Description */
+		.description,
+		.event-description {
+			color: #666;
+			margin-bottom: 15px;
+			font-size: 14px;
+			line-height: 1.5;
+			flex-grow: 1;
+		}
+
+		/* Buttons */
+		.read_bt,
+		.product-actions,
+		.event-actions {
+			margin-top: auto;
+			padding-top: 10px;
+		}
+
+		.btn {
+			padding: 6px 12px;
+			font-size: 14px;
+			border-radius: 4px;
+			text-decoration: none;
+			transition: all 0.3s ease;
+		}
+
+		.btn-outline-primary {
+			border: 1px solid #007bff;
+			color: #007bff;
+		}
+
+		.btn-outline-primary:hover {
+			background: #007bff;
+			color: white;
+		}
+
+		.btn-primary {
+			background: #007bff;
+			color: white;
+			border: 1px solid #007bff;
+		}
+
+		.btn-primary:hover {
+			background: #0056b3;
+			border-color: #0056b3;
+		}
+
+		.atelier-card:hover,
+		.product-card:hover,
+		.event-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+
+		/* Image container */
+		.atelier-image,
+		.product-image,
+		.event-image {
+			width: 100%;
+			height: 200px;
+			overflow: hidden;
+			background-color: #f5f5f5;
+			position: relative;
+		}
+
+		.event-image {
+			height: 160px;
+		}
+
+		/* Images */
+		.atelier-image img,
+		.product-image img,
+		.event-image img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 0.5s ease;
+		}
+
+		.atelier-card:hover .atelier-image img,
+		.product-card:hover .product-image img,
+		.event-card:hover .event-image img {
+			transform: scale(1.1);
+		}
+
+		/* Content area */
+		.atelier-content,
+		.product-content,
+		.event-content {
+			padding: 20px;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+
+		/* Headings */
+		.atelier-content h3,
+		.product-content h3,
+		.event-content h3 {
+			margin: 0 0 10px;
+			color: #333;
+			font-size: 1.1rem;
+			font-weight: 600;
+		}
+
+		/* Price */
+		.price {
+			color: #d98473;
+			font-weight: 600;
+			margin: 5px 0 10px;
+		}
+
+		/* Description */
+		.description {
+			color: #666;
+			font-size: 0.9rem;
+			margin-bottom: 15px;
+			flex-grow: 1;
+		}
+
+		/* Buttons */
+		.read_bt a,
+		.product-actions a,
+		.event-actions a {
+			display: inline-block;
+			padding: 8px 15px;
+			background: #d98473;
+			color: #fff;
+			border-radius: 5px;
+			transition: all 0.3s ease;
+			text-decoration: none;
+			font-size: 0.9rem;
+			text-align: center;
+		}
+
+		.product-actions,
+		.event-actions {
+			display: flex;
+			gap: 8px;
+			margin-top: auto;
+		}
+
+		.btn-outline-primary {
+			border: 1px solid #d98473;
+			color: #d98473;
+			background: transparent;
+		}
+
+		.btn-outline-primary:hover {
+			background: #f8f0ee;
+		}
+
+		.btn-primary {
+			background: #d98473;
+			color: white;
+			border: 1px solid #d98473;
+		}
+
+		/* Event date */
+		.event-date {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			background: rgba(255, 255, 255, 0.9);
+			padding: 8px 12px;
+			border-radius: 5px;
+			text-align: center;
+			z-index: 1;
+		}
+
+		.event-date .day {
+			display: block;
+			font-size: 1.5rem;
+			font-weight: bold;
+			line-height: 1;
+			color: #d98473;
+		}
+
+		.event-date .month {
+			font-size: 0.8rem;
+			text-transform: uppercase;
+			color: #666;
+		}
+
+		/* Event meta */
+		.event-meta {
+			margin: 10px 0 15px;
+			font-size: 0.85rem;
+			color: #666;
+		}
+
+		.event-meta i {
+			margin-right: 5px;
+			color: #d98473;
+			width: 18px;
+			text-align: center;
+		}
+
+		/* Badges */
+		.badge {
+			display: inline-block;
+			padding: 5px 10px;
+			border-radius: 4px;
+			font-size: 0.8rem;
+			font-weight: 500;
+		}
+
+		/* Navigation */
+		.swiper-button-next,
+		.swiper-button-prev {
+			color: #d98473;
+			background: rgba(255, 255, 255, 0.9);
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			transition: all 0.3s ease;
+		}
+
+		.swiper-button-next:hover,
+		.swiper-button-prev:hover {
+			background: #fff;
+			transform: scale(1.1);
+		}
+
+		.swiper-button-next:after,
+		.swiper-button-prev:after {
+			font-size: 16px;
+			font-weight: bold;
+		}
+
+		/* Pagination */
+		.swiper-pagination-bullet {
+			background: #ccc;
+			opacity: 1;
+			width: 10px;
+			height: 10px;
+			margin: 0 5px;
+		}
+
+		.swiper-pagination-bullet-active {
+			background: #d98473;
+			transform: scale(1.2);
+		}
+	</style>
+{% endblock %}
+
+{% block javascripts %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () { // Initialize Ateliers Slider
+if (document.querySelector('.atelier-slider')) {
+new Swiper('.atelier-slider', {
+slidesPerView: 1,
+spaceBetween: 20,
+loop: {{ ateliers is defined and ateliers|length > 1 ? 'true' : 'false' }},
+autoplay: {
+delay: 4000,
+disableOnInteraction: false
+},
+pagination: {
+el: '.atelier-slider .swiper-pagination',
+clickable: true
+},
+navigation: {
+nextEl: '.atelier-slider .swiper-button-next',
+prevEl: '.atelier-slider .swiper-button-prev'
+},
+breakpoints: {
+576: {
+slidesPerView: 2,
+spaceBetween: 15
+},
+768: {
+slidesPerView: 2,
+spaceBetween: 20
+},
+992: {
+slidesPerView: 3,
+spaceBetween: 25
+},
+1200: {
+slidesPerView: 4,
+spaceBetween: 30
+}
+}
+});
+}
+
+// Initialize Products Slider
+if (document.querySelector('.product-slider')) {
+new Swiper('.product-slider', {
+slidesPerView: 1,
+spaceBetween: 20,
+loop: {{ produits is defined and produits|length > 1 ? 'true' : 'false' }},
+autoplay: {
+delay: 4500,
+disableOnInteraction: false
+},
+pagination: {
+el: '.product-slider .swiper-pagination',
+clickable: true
+},
+navigation: {
+nextEl: '.product-slider .swiper-button-next',
+prevEl: '.product-slider .swiper-button-prev'
+},
+breakpoints: {
+576: {
+slidesPerView: 2,
+spaceBetween: 15
+},
+768: {
+slidesPerView: 3,
+spaceBetween: 20
+},
+992: {
+slidesPerView: 3,
+spaceBetween: 25
+},
+1200: {
+slidesPerView: 4,
+spaceBetween: 30
+}
+}
+});
+}
+
+
+// Initialize Events Slider
+if (document.querySelector('.event-slider')) {
+new Swiper('.event-slider', {
+slidesPerView: 1,
+spaceBetween: 20,
+loop: {{ events is defined and events|length > 1 ? 'true' : 'false' }},
+autoplay: {
+delay: 5000,
+disableOnInteraction: false
+},
+pagination: {
+el: '.event-slider .swiper-pagination',
+clickable: true
+},
+navigation: {
+nextEl: '.event-slider .swiper-button-next',
+prevEl: '.event-slider .swiper-button-prev'
+},
+breakpoints: {
+576: {
+slidesPerView: 2,
+spaceBetween: 15
+},
+992: {
+slidesPerView: 2,
+spaceBetween: 20
+},
+1200: {
+slidesPerView: 3,
+spaceBetween: 25
+}
+}
+});
+}
+
+});
+	</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Artisan{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .order-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #6c757d;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50rem;
+        }
+        .status-pending { background-color: #ffc107; color: #212529; }
+        .status-paid { background-color: #0d6efd; color: white; }
+        .status-shipped { background-color: #6f42c1; color: white; }
+        .status-delivered { background-color: #198754; color: white; }
+        .status-cancelled { background-color: #dc3545; color: white; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">{% block page_title %}{% endblock %}</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0">
+                            <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('app_artisan_orders_index') }}">Commandes</a></li>
+                            <li class="breadcrumb-item active">{% block breadcrumb_active %}{% endblock %}</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        {% block artisan_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

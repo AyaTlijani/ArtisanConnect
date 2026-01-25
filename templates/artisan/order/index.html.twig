@@ -1,0 +1,115 @@
+{% extends 'artisan/base.html.twig' %}
+
+{% block page_title %}Mes Commandes{% endblock %}
+{% block breadcrumb_active %}Liste des Commandes{% endblock %}
+
+{% block artisan_content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Liste des Commandes</h5>
+                        <div>
+                            <a href="{{ path('app_livreur_index') }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-truck me-1"></i> Gérer les Livreurs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if orders|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th># Commande</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Statut</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                        <tr class="order-row" data-order-id="{{ order.getOrderId() }}">
+                                            <td>#{{ order.getOrderId() }}</td>
+                                            <td>
+                                                <div>{{ order.getFullName() ?? 'Client name not available' }}</div>
+                                                <small class="text-muted">{{ order.getEmail() ?? 'Email not available' }}</small>
+                                                <div class="small text-muted">Order ID: {{ order.getOrderId() }}</div>
+                                            </td>
+                                            <td>
+                                                {% if order.getCreatedAt() is defined and order.getCreatedAt() %}
+                                                    {{ order.getCreatedAt()|date('d/m/Y H:i') }}
+                                                {% else %}
+                                                    Date non disponible
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if order.getTotalPrice() is defined %}
+                                                    {{ order.getTotalPrice()|number_format(3, '.', ' ') }} TND
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% set statusClass = '' %}
+                                                {% set status = order.getStatus()|lower %}
+                                                {% if status == 'pending' %}
+                                                    {% set statusClass = 'badge bg-warning' %}
+                                                {% elseif status == 'paid' %}
+                                                    {% set statusClass = 'badge bg-info' %}
+                                                {% elseif status == 'shipped' %}
+                                                    {% set statusClass = 'badge bg-primary' %}
+                                                {% elseif status == 'delivered' %}
+                                                    {% set statusClass = 'badge bg-success' %}
+                                                {% elseif status == 'cancelled' %}
+                                                    {% set statusClass = 'badge bg-danger' %}
+                                                {% else %}
+                                                    {% set statusClass = 'badge bg-secondary' %}
+                                                {% endif %}
+                                                <span class="{{ statusClass }}">
+                                                    {{ status|capitalize }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{{ path('app_artisan_order_show', {'id': order.getOrderId()}) }}" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-box-open fa-4x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">Aucune commande trouvée</h5>
+                            <p class="text-muted">Vous n'avez pas encore reçu de commandes.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

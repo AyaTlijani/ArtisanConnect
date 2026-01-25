@@ -1,0 +1,147 @@
+{% extends 'basef.html.twig' %}
+
+{% block title %}{{ produit.nom }} - Détails du produit{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="product-image-container mb-4">
+                <img src="{{ produit.image ? asset('uploads/produits/' ~ produit.image) : asset('assets/images/1.jpg') }}" 
+                     alt="{{ produit.nom }}" 
+                     class="img-fluid rounded"
+                     onerror="this.src='{{ asset('assets/images/1.jpg') }}'">
+                {% if not produit.disponibilite %}
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-3">Épuisé</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h1 class="mb-3">{{ produit.nom }}</h1>
+            
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="text-primary mb-0">{{ produit.prix }} TND</h3>
+                    {% include 'components/_rating_stars.html.twig' with {'entity': produit, 'entityType': 'produit'} %}
+                </div>
+                
+                {% if produit.quantite is defined %}
+                    <p class="text-muted">
+                        {% if produit.quantite > 0 %}
+                            En stock ({{ produit.quantite }} disponible{{ produit.quantite > 1 ? 's' : '' }})
+                        {% else %}
+                            <span class="text-danger">Rupture de stock</span>
+                        {% endif %}
+                    </p>
+                {% endif %}
+                
+                <p class="mt-3">{{ produit.description|nl2br }}</p>
+                
+                <div class="d-flex gap-2 mt-4">
+                    {% if produit.disponibilite and (produit.quantite is not defined or produit.quantite > 0) %}
+                        <form action="{{ path('app_cart_add', {'id': produit.idProduit}) }}" method="post" class="d-flex align-items-center">
+                            <input type="number" name="quantity" value="1" min="1" max="{{ produit.quantite ?? 10 }}" class="form-control me-2" style="width: 80px;">
+                            <button type="submit" class="btn btn-primary add-to-cart" data-name="{{ produit.nom }}">
+                                <i class="fas fa-shopping-cart me-2"></i>Ajouter au panier
+                            </button>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-secondary" disabled>Indisponible</button>
+                    {% endif %}
+                    <a href="{{ path('app_shop_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+                
+                <!-- Ratings Section -->
+                <div class="mt-5">
+                    <h4>Notes et avis</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            {% if produit.ratings|length > 0 %}
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="display-4 me-3">{{ "%0.1f"|format(produit.averageRating|default(0)) }}</div>
+                                        <div>
+                                            {% include 'components/_rating_stars.html.twig' with {'entity': produit, 'entityType': 'produit'} %}
+                                            <div class="text-muted small">Basé sur {{ produit.ratings|length }} avis</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Rating Distribution -->
+                                    <div class="rating-distribution">
+                                        {% for i in 5..1 %}
+                                            {% set count = produit.ratings|filter(r => r.rating == i)|length %}
+                                            {% set percentage = produit.ratings|length > 0 ? (count / produit.ratings|length * 100) : 0 %}
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="text-nowrap me-2" style="width: 30px;">{{ i }} <i class="fas fa-star text-warning"></i></div>
+                                                <div class="progress flex-grow-1" style="height: 20px;">
+                                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ percentage }}%" 
+                                                         aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <div class="ms-2 text-muted small" style="width: 40px;">{{ count }}</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Reviews List -->
+                                <div class="reviews-list">
+                                    <h5 class="mb-3">Avis récents</h5>
+                                    {% for rating in produit.ratings|slice(0, 3) %}
+                                        <div class="review-item mb-3 pb-3 border-bottom">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="fw-bold">{{ rating.user.getNom() ?? 'Anonyme' }}</div>
+                                                <div class="text-muted small">
+                                                    {{ rating.createdAt|date('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                            <div class="text-warning mb-2">
+                                                {% for i in 1..5 %}
+                                                    <i class="fas {{ i <= rating.rating ? 'fa-star' : 'far fa-star' }}"></i>
+                                                {% endfor %}
+                                            </div>
+                                            {% if rating.comment %}
+                                                <p class="mb-0">{{ rating.comment }}</p>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">Aucun avis pour le moment. Soyez le premier à noter ce produit !</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if produit.categorie %}
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Catégorie</h5>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge bg-info">{{ produit.categorie }}</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.product-image-container {
+    position: relative;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    padding: 1rem;
+}
+.product-image-container img {
+    max-height: 500px;
+    width: 100%;
+    object-fit: contain;
+}
+</style>
+{% endblock %}

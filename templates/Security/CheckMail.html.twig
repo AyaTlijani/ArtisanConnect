@@ -1,0 +1,120 @@
+{% block title %}Check Your Email - Aatrii{% endblock %}
+
+{% block body %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+        .email-card {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            border: none;
+        }
+        .email-icon {
+            width: 80px;
+            height: 80px;
+            background: #f0f4ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .email-icon i {
+            font-size: 2.5rem;
+            color: #6c5ce7;
+        }
+        h1 {
+            color: #2d3436;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            font-size: 1.8rem;
+        }
+        .lead-text {
+            color: #636e72;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .email-address {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 1rem 0;
+            font-weight: 600;
+            color: #2d3436;
+            border: 1px dashed #dee2e6;
+        }
+        .btn-primary {
+            background-color: #6c5ce7;
+            border: none;
+            padding: 0.7rem 2.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #5a4bc9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+        }
+        .text-muted {
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+            color: #95a5a6 !important;
+        }
+        .text-muted a {
+            color: #6c5ce7;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="email-card">
+            <div class="email-icon">
+                <i class="bi bi-envelope-check"></i>
+            </div>
+            <h1>Check Your Email</h1>
+            <p class="lead-text">We've sent a verification link to your email address to complete your registration.</p>
+            <div class="email-address">{{ email }}</div>
+            <p class="text-muted">The link will expire in 24 hours. Please check your spam folder if you don't see it.</p>
+            <a href="{{ path('app_sign_up') }}" class="btn btn-primary">Back to Sign Up</a>
+            <p class="text-muted mt-3">
+                Didn't receive the email? <a href="#" class="resend-link">Resend verification</a>
+            </p>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script>
+        // Add smooth hover effect
+        document.querySelector('.btn-primary').addEventListener('mouseover', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        document.querySelector('.btn-primary').addEventListener('mouseout', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'basef.html.twig' %}
+
+{% block title %}Détails de la réservation{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Confirmation de votre réservation</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Votre réservation a été enregistrée avec succès !
+                    </div>
+                    
+                    <div class="reservation-details">
+                        <h3 class="h5 mb-4">Détails de la réservation</h3>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Numéro de réservation :</div>
+                            <div class="col-md-8">#{{ reservation.id }}</div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Atelier :</div>
+                            <div class="col-md-8">{{ reservation.service.nom }}</div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Date :</div>
+                            <div class="col-md-8">
+                                {{ reservation.date ? reservation.date|format_datetime('full', 'none', locale='fr')|capitalize }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Heure :</div>
+                            <div class="col-md-8">
+                                {{ reservation.heure ? reservation.heure|date('H:i') : '' }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Nombre de personnes :</div>
+                            <div class="col-md-8">{{ reservation.nombrePersonnes }}</div>
+                        </div>
+                        
+                        {% if reservation.montant %}
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Montant total :</div>
+                            <div class="col-md-8">{{ reservation.montant }} TND</div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Statut :</div>
+                            <div class="col-md-8">
+                                <span class="badge bg-info">{{ reservation.statut ?? 'En attente' }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if reservation.commentaire %}
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Vos commentaires :</div>
+                            <div class="col-md-8">{{ reservation.commentaire }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="text-muted small mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Vous recevrez une confirmation par email avec les détails de votre réservation.
+                            Pour toute question, n'hésitez pas à nous contacter.
+                        </p>
+                        
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('app_atelier_index_user') }}" class="btn btn-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour aux ateliers
+                            </a>
+                            <a href="{{ path('app_home') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i>Page d'accueil
+                            </a>
+                        </div>
+                    </div>
+{% endblock %}

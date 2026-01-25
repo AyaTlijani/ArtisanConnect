@@ -1,0 +1,116 @@
+{% extends 'basef.html.twig' %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">My Orders</h1>
+            
+            {% if orders is empty %}
+                <div class="alert alert-info">
+                    You haven't placed any orders yet. <a href="{{ path('app_shop_index') }}" class="alert-link">Start shopping</a>!
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Delivery Person</th>
+                                <th>Total</th>
+                                <th>Tracking</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.createdAt|date('M d, Y H:i') }}</td>
+                                    <td>
+                                        <span class="badge {% if order.status == 'delivered' %}bg-success{% elseif order.status == 'shipped' %}bg-info{% elseif order.status == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ order.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.livreur }}</td>
+                                    <td>${{ "%.2f"|format(order.totalPrice) }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ order.trackingNumber }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_order_show', {'order_id': order.id}) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="tracking-status mt-5">
+                    <h4 class="mb-4">Order Status Guide</h4>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-2"><i class="fas fa-clock fa-2x text-warning"></i></div>
+                                    <h5>Pending</h5>
+                                    <p class="text-muted small">Your order is being processed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-2"><i class="fas fa-truck-loading fa-2x text-info"></i></div>
+                                    <h5>Shipped</h5>
+                                    <p class="text-muted small">Your order is on the way</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-2"><i class="fas fa-check-circle fa-2x text-success"></i></div>
+                                    <h5>Delivered</h5>
+                                    <p class="text-muted small">Successfully delivered</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-2"><i class="fas fa-times-circle fa-2x text-danger"></i></div>
+                                    <h5>Cancelled</h5>
+                                    <p class="text-muted small">Order was cancelled</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .tracking-status .card {
+        transition: transform 0.2s;
+        border: 1px solid #e0e0e0;
+    }
+    .tracking-status .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .badge {
+        font-size: 0.9em;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}

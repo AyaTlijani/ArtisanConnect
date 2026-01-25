@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Product Details{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Product Details</h4>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    {% if produit.image %}
+                        <img src="{{ asset('uploads/produits/' ~ produit.image) }}" class="img-fluid rounded" alt="{{ produit.nom }}">
+                    {% else %}
+                        <img src="{{ asset('uploads/default.jpg') }}" class="img-fluid rounded" alt="{{ produit.nom }}">
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <h4>{{ produit.nom }}</h4>
+                    <p class="text-muted">{{ produit.description }}</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Price</label>
+                                <p class="form-control-plaintext">{{ produit.prix }} TND</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quantity</label>
+                                <p class="form-control-plaintext">{{ produit.quantite }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Availability</label>
+                                <p class="form-control-plaintext">{{ produit.disponibilite ? 'Available' : 'Not Available' }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Category</label>
+                                <p class="form-control-plaintext">{{ produit.categorie }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Artisan</label>
+                                <p class="form-control-plaintext">{% if produit.idArtisan %}{{ produit.idArtisan.fullName }}{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{{ path('admin_produit_index') }}" class="btn btn-secondary">Back to list</a>
+                <a href="{{ path('admin_produit_edit', {'id': produit.idProduit}) }}" class="btn btn-warning">Edit</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

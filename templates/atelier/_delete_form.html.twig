@@ -1,0 +1,8 @@
+<form method="post" action="{{ path('app_atelier_delete', {'idAtelier': atelier.id}) }}" 
+      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet atelier ?');"
+      class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ atelier.getIdAtelier()) }}">
+    <button class="btn btn-sm btn-danger" title="Supprimer">
+        <i class="ti ti-trash"></i>
+    </button>
+</form>

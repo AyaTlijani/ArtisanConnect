@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale|default('fr') }}">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>
+        {% block title %}Aarti - Événements{% endblock %}
+    </title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('assetsF/images/fevicon.png') }}" type="image/gif">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ asset('assetsF/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assetsF/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assetsF/css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ asset('assetsF/css/jquery.mCustomScrollbar.min.css') }}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome (Updated to 6.4.2 for consistency) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header-section">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-2">
+                <!-- Logo on the Left -->
+                <div class="d-flex align-items-center">
+                    <a class="navbar-brand" href="{{ path('app_home') }}">
+                        <img src="{{ asset('assets/images/logo.jpg') }}" width="150" alt="Aarti Logo" class="img-fluid">
+                    </a>
+                </div>
+
+                <!-- Mobile Toggle -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Main Navigation on the Right -->
+                <div class="collapse navbar-collapse justify-content-end" id="navbarMain">
+                    <ul class="navbar-nav align-items-center">
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2 {{ app.request.get('_route') == 'app_home' ? 'active fw-bold' : '' }}" href="{{ path('app_home') }}">
+                                <i class="fas fa-home me-1"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2 {{ 'app_shop_' in app.request.get('_route') ? 'active fw-bold' : '' }}" href="{{ path('app_shop_index') }}">
+                                <i class="fas fa-shopping-bag me-1"></i> Shop
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2 {{ 'app_atelier_' in app.request.get('_route') ? 'active fw-bold' : '' }}" href="{{ path('app_atelier_index_user') }}">
+                                <i class="fas fa-tools me-1"></i> Workshop
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2 {{ 'app_event_' in app.request.get('_route') ? 'active fw-bold' : '' }}" href="{{ path('app_event_index') }}">
+                                <i class="fas fa-calendar-alt me-1"></i> Events
+                            </a>
+                        </li>
+                        
+
+                        <!-- Orders -->
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2 {{ 'app_client_orders' in app.request.get('_route') ? 'active fw-bold' : '' }}" 
+                               href="{{ path('app_client_orders') }}" 
+                               title="My Orders & Tracking">
+                                <i class="fas fa-box-open me-1"></i> My Orders & Tracking
+                            </a>
+                        </li>
+
+                        <!-- Cart -->
+                        <li class="nav-item ms-3">
+                            <a class="nav-link position-relative px-3 py-2" href="{{ path('app_cart_index') }}" title="Shopping Cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                {% set cartCount = app.session.get('cart')|length|default(0) %}
+                                {% if cartCount > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ cartCount }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </li>
+
+                        <!-- User Info and Logout -->
+                        {% if app.user %}
+                            <li class="nav-item ms-4 d-flex align-items-center">
+                                <span class="me-3 text-muted">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    {{ app.user.fullName|default(app.user.email) }}
+                                </span>
+                                <form id="logout-form" action="{{ path('app_logout') }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        {% else %}
+                            <li class="nav-item ms-3">
+                                <a href="{{ path('app_sign_in') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Login
+                                </a>
+                            </li>
+                            <li class="nav-item ms-2">
+                                <a href="{{ path('app_sign_up') }}" class="btn btn-primary">
+                                    <i class="fas fa-user-plus me-1"></i> Sign Up
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <!-- End Header Section -->
+
+    <!-- Flash Messages Toast -->
+    <div class="position-fixed top-1rem end-1rem" style="z-index: 1100">
+        {% for type, messages in app.flashes(['success', 'error', 'warning', 'info']) %}
+            {% for message in messages %}
+                <div class="toast-container">
+                    <div class="toast toast-{{ type }}" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <i class="fas fa-{{ type == 'success' ? 'check-circle' : (type == 'error' ? 'exclamation-circle' : 'info-circle') }} me-2"></i>
+                            <strong class="me-auto">{{ type|capitalize }}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <style>
+        /* Ensure logo and menu alignment */
+        .navbar-brand img {
+            max-width: 100px;
+            height: auto;
+        }
+
+        .navbar-nav {
+            align-items: center;
+        }
+
+        .navbar-collapse {
+            flex-grow: 0; /* Prevents the navbar from taking up unnecessary space */
+        }
+
+        /* Toast styles remain the same */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: none;
+            border-radius: 8px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.hide {
+            display: block !important;
+        }
+
+        .toast-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .toast-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .toast-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .toast-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .toast-header {
+            background-color: transparent;
+            border-bottom: none;
+            padding: 0.75rem 1rem;
+        }
+
+        .toast-header i {
+            font-size: 1.25rem;
+        }
+
+        .toast-body {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Navbar User Menu Styles */
+        .nav-item.dropdown {
+            position: static;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle .user_icon {
+            background-color: #f8f9fa;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle .fas {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 0.5rem;
+            padding: 0.5rem 0;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #000;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item.text-danger {
+            color: #dc3545;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background-color: #f8f9fa;
+            color: #dc3545;
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Search Toggle */
+        .search-toggle {
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .search-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: #000;
+        }
+
+        .search-toggle .fas {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+
+        /* Login and Sign Up Buttons */
+        .btn-outline-primary {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.15);
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25);
+        }
+
+        /* Navbar Links */
+        .nav-link {
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: #000;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Cart Button */
+        .cart-count {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .cart-count.badge {
+            padding: 0.35em 0.65em;
+            border-radius: 10px;
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% for type, messages in app.flashes(['success', 'error', 'warning', 'info']) %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="container layout_padding">
+        {% block body %}{% endblock %}
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="{{ asset('assetsF/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('assetsF/js/popper.min.js') }}"></script>
+    <script src="{{ asset('assetsF/js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Initialize toast
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Bootstrap toast
+            const cartToastEl = document.getElementById('cartToast');
+            const cartToast = new bootstrap.Toast(cartToastEl, {
+                autohide: true,
+                delay: 3000
+            });
+
+            // Function to show toast notification
+            window.showCartNotification = function (message, type = 'add') {
+                const toastEl = document.getElementById('cartToast');
+                const toastMessage = document.getElementById('toastMessage');
+                const toastTitle = document.getElementById('toastTitle');
+                const toastIcon = document.getElementById('toastIcon');
+                const toastHeader = toastEl.querySelector('.toast-header');
+
+                // Set message and type
+                toastMessage.textContent = message;
+
+                // Update style based on type
+                if (type === 'remove') {
+                    toastHeader.className = 'toast-header bg-danger text-white';
+                    toastTitle.textContent = 'Retiré';
+                    toastIcon.className = 'fas fa-trash-alt me-3';
+                } else { // Default to add style
+                    toastHeader.className = 'toast-header bg-success text-white';
+                    toastTitle.textContent = 'Succès';
+                    toastIcon.className = 'fas fa-shopping-cart me-3';
+                }
+
+                // Show the toast with animation
+                toastEl.classList.remove('hide');
+                toastEl.classList.add('show');
+
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    toastEl.classList.remove('show');
+                    toastEl.classList.add('hide');
+                }, 3000);
+            };
+
+            // Alias for adding to cart
+            window.showAddToCart = function (productName) {
+                showCartNotification(`${productName} a été ajouté au panier !`, 'add');
+            };
+
+            // Alias for removing from cart
+            window.showRemoveFromCart = function (productName) {
+                showCartNotification(`${productName} a été retiré du panier.`, 'remove');
+            };
+
+            // Initialize all flash message toasts
+            const flashToasts = document.querySelectorAll('.toast-container .toast');
+            flashToasts.forEach(toast => {
+                const bsToast = new bootstrap.Toast(toast, {
+                    autohide: true,
+                    delay: 3000
+                });
+                bsToast.show();
+            });
+
+            // Handle add to cart form submissions
+            document.querySelectorAll('.add-to-cart-form').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const productName = this.querySelector('button[type="submit"]')?.dataset?.name || 'le produit';
+
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            showCartNotification(`${productName} a été ajouté au panier !`);
+                            // Update cart count if element exists
+                            const cartCount = document.querySelector('.cart-count');
+                            if (cartCount) {
+                                cartCount.textContent = data.cartCount || 0;
+                            }
+                        } else {
+                            showCartNotification(data.message || 'Une erreur est survenue');
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        showCartNotification('Une erreur est survenue lors de l\'ajout au panier');
+                    });
+                });
+            });
+
+            // Handle direct add to cart buttons
+            document.addEventListener('submit', function (e) {
+                if (e.target && e.target.matches('.add-to-cart-form')) {
+                    e.preventDefault();
+
+                    const form = e.target;
+                    const url = form.getAttribute('action');
+                    const formData = new FormData(form);
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    const originalButtonHtml = submitButton.innerHTML;
+
+                    // Disable button and show loading state
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+
+                    // Send the form data via fetch
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) { // Show success message
+                            showCartNotification(data.message || 'Product added to cart!');
+
+                            // Update cart count in navbar if available
+                            if (data.cartCount !== undefined) {
+                                const cartCountElements = document.querySelectorAll('.cart-count');
+                                cartCountElements.forEach(el => {
+                                    el.textContent = data.cartCount;
+                                    el.classList.remove('d-none');
+                                });
+                            }
+                        } else { // Show error message
+                            showCartNotification(data.message || 'An error occurred', 'error');
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        showCartNotification('An error occurred while adding to cart', 'error');
+                    }).finally(() => { // Re-enable button and restore original text
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonHtml;
+                    });
+
+                    return false;
+                }
+            });
+
+            // Function to show cart notification
+            function showCartNotification(message, type = 'success') {
+                const toastEl = document.getElementById('cartToast');
+                const toastBody = toastEl.querySelector('.toast-body');
+                const toast = bootstrap.Toast.getInstance(toastEl) || new bootstrap.Toast(toastEl);
+
+                // Set message and style based on type
+                toastBody.textContent = message;
+                toastEl.className = 'toast align-items-center text-white border-0';
+                toastEl.classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
+
+                // Show the toast
+                toast.show();
+            }
+
+            // Old direct link handler (keep for backward compatibility)
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const productName = this.dataset.name || 'le produit';
+                    const url = this.href;
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            showCartNotification(`${productName} a été ajouté au panier !`);
+                            // Update cart count if element exists
+                            const cartCount = document.querySelector('.cart-count');
+                            if (cartCount) {
+                                cartCount.textContent = data.cartCount || 0;
+                            }
+                        } else {
+                            showCartNotification(data.message || 'Une erreur est survenue');
+                        }
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        showCartNotification('Une erreur est survenue lors de l\'ajout au panier');
+                    });
+                });
+            });
+        });
+    </script>
+    <!-- Include Chat Bubble Component -->
+    {{ include('components/_chat_bubble.html.twig') }}
+    
+    <script src="{{ asset('assetsF/js/plugin.js') }}"></script>
+    
+    <!-- Rating System JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle click on stars
+        document.addEventListener('click', function(e) {
+            const star = e.target.closest('.fa-star');
+            if (!star) return;
+            
+            const ratingContainer = star.closest('.rating-stars');
+            const entityId = ratingContainer.dataset.entityId;
+            const entityType = ratingContainer.dataset.entityType;
+            const rating = parseInt(star.dataset.rating);
+            
+            // Check if user is logged in
+            {% if app.user %}
+                // Send AJAX request to save the rating
+                fetch('{{ path('app_rate') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        entityId: entityId,
+                        entityType: entityType,
+                        rating: rating
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the UI with the new average
+                        const stars = ratingContainer.querySelectorAll('.fa-star');
+                        stars.forEach((s, index) => {
+                            if (index < data.averageRating) {
+                                s.classList.remove('far');
+                                s.classList.add('fas');
+                            } else {
+                                s.classList.remove('fas');
+                                s.classList.add('far');
+                            }
+                        });
+                        
+                        // Update rating count
+                        const countSpan = ratingContainer.querySelector('.rating-count');
+                        if (countSpan) {
+                            countSpan.textContent = `(${data.ratingCount})`;
+                        }
+                    } else {
+                        alert('You have already rated this item.');
+                    }
+                });
+            {% else %}
+                // If user is not logged in, redirect to login
+                window.location.href = '{{ path('app_sign_in') }}';
+            {% endif %}
+        });
+        
+        // Add hover effect for stars
+        document.querySelectorAll('.rating-stars').forEach(container => {
+            const stars = container.querySelectorAll('.fa-star');
+            
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    stars.forEach((s, i) => {
+                        if (i < rating) {
+                            s.classList.remove('far');
+                            s.classList.add('fas');
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseout', () => {
+                    const averageRating = parseFloat(container.dataset.averageRating) || 0;
+                    stars.forEach((s, i) => {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                        if (i < averageRating) {
+                            s.classList.remove('far');
+                            s.classList.add('fas');
+                        }
+                    });
+                });
+            });
+        });
+    });
+    </script>
+    <script src="{{ asset('assetsF/js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
+    <script src="{{ asset('assetsF/js/custom.js') }}"></script>
+    <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+
+    <!-- Custom JavaScript for Search Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchToggle = document.querySelector('.search-toggle');
+            const searchFormContainer = document.querySelector('.search-form-container');
+
+            if (searchToggle && searchFormContainer) {
+                searchToggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    searchFormContainer.style.display = searchFormContainer.style.display === 'block' ? 'none' : 'block';
+                });
+
+                // Close search form when clicking outside
+                document.addEventListener('click', function (e) {
+                    if (!searchToggle.contains(e.target) && !searchFormContainer.contains(e.target)) {
+                        searchFormContainer.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

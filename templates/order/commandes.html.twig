@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Commandes{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Commandes</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Date</th>
+                                        <th>Livreur</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recentOrders %}
+                                    <tr>
+                                        <td>#{{ order.orderId }}</td>
+                                        <td>{{ order.fullName }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ order.status == 'livrée' ? 'success' : (order.status == 'en préparation' ? 'warning' : 'info') }}">
+                                                {{ order.status|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td>{{ order.totalPrice|number_format(2, '.', ',') }} TND</td>
+                                        <td>{{ order.createdAt|date('Y-m-d H:i') }}</td>
+                                        <td>
+                                            {% if order.livreur %}
+                                                {{ order.livreur.nom }}
+                                            {% else %}
+                                                <span class="text-muted">Non assigné</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('app_order_show', {'order_id': order.orderId}) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if order.status != 'livrée' and order.status != 'annulée' %}
+                                                <div class="dropdown d-inline-block">
+                                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Assign Livreur
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        {% for livreur in livreurs %}
+                                                            {% if livreur.disponible %}
+                                                                <li>
+                                                                    <a class="dropdown-item assign-livreur" 
+                                                                       href="#" 
+                                                                       data-order-id="{{ order.orderId }}" 
+                                                                       data-livreur-id="{{ livreur.id }}"
+                                                                       data-livreur-name="{{ livreur.nom }}">
+                                                                        {{ livreur.nom }} ({{ livreur.vehicule }})
+                                                                    </a>
+                                                                </li>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <li><a class="dropdown-item disabled" href="#">Aucun livreur disponible</a></li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center">No orders found</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .badge {
+            font-size: 0.9em;
+            padding: 0.5em 0.75em;
+        }
+        .dropdown-menu {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const assignButtons = document.querySelectorAll('.assign-livreur');
+            assignButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const orderId = this.getAttribute('data-order-id');
+                    const livreurId = this.getAttribute('data-livreur-id');
+                    const livreurName = this.getAttribute('data-livreur-name');
+
+                    if (confirm(`Assigner ${livreurName} à la commande #${orderId} ?`)) {
+                        fetch('{{ path('app_order_assign_livreur') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                orderId: orderId,
+                                livreurId: livreurId
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Livreur assigné avec succès !');
+                                // Update the Livreur column in the table
+                                const livreurCell = button.closest('tr').querySelector('td:nth-child(6)');
+                                livreurCell.textContent = livreurName;
+                                // Optionally, disable the dropdown or update UI
+                                button.closest('.dropdown').remove();
+                            } else {
+                                alert('Erreur : ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Une erreur est survenue lors de l\'assignation.');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

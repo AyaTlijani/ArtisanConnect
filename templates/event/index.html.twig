@@ -1,0 +1,206 @@
+{% extends 'baseF.html.twig' %}
+
+{% block title %}Événements à venir
+{% endblock %}
+
+{% block stylesheets %}
+	<style>
+		.search-form .form-control {
+			border-radius: 4px;
+			margin-bottom: 10px;
+		}
+		.search-form label {
+			font-weight: 600;
+			margin-bottom: 5px;
+		}
+		.search-results.loading::before {
+			content: 'Chargement...';
+			display: block;
+			text-align: center;
+			padding: 10px;
+			color: #666;
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+	<div class="coffee_section layout_padding">
+		<div class="container">
+			<div class="row">
+				<h1 class="coffee_taital">Événements à venir</h1>
+				<div class="bulit_icon"><img src="{{ asset('assetsF/images/bulit-icon.png') }}" alt="Bullet Icon"></div>
+			</div>
+
+			<!-- Search Form -->
+			<div class="search-form mb-4">
+				<form id="search-form">
+					<div class="row">
+						<div class="col-md-4">
+							<label for="name">Nom</label>
+							<input type="text" name="name" id="name" class="form-control" placeholder="Nom de l'événement" value="{{ app.request.query.get('name') }}">
+						</div>
+						<div class="col-md-4">
+							<label for="date">Date</label>
+							<input type="date" name="date" id="date" class="form-control" value="{{ app.request.query.get('date') }}">
+						</div>
+						<div class="col-md-4">
+							<label for="price">Prix (TND)</label>
+							<input type="number" name="price" id="price" class="form-control" step="0.01" placeholder="Prix maximum" value="{{ app.request.query.get('price') }}">
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col-md-4">
+							<label for="status">Statut</label>
+							<select name="status" id="status" class="form-control">
+								<option value="">Tous</option>
+								<option value="Upcoming" {{ app.request.query.get('status') == 'Upcoming' ? 'selected' : '' }}>À venir</option>
+								<option value="Ongoing" {{ app.request.query.get('status') == 'Ongoing' ? 'selected' : '' }}>En cours</option>
+								<option value="Completed" {{ app.request.query.get('status') == 'Completed' ? 'selected' : '' }}>Terminé</option>
+								<option value="Cancelled" {{ app.request.query.get('status') == 'Cancelled' ? 'selected' : '' }}>Annulé</option>
+							</select>
+						</div>
+						<div class="col-md-4">
+							<label for="organizer">Organisateur</label>
+							<select name="organizer" id="organizer" class="form-control">
+								<option value="">Tous</option>
+								{% for user in organizers %}
+									<option value="{{ user.idUser }}" {{ app.request.query.get('organizer') == user.idUser ? 'selected' : '' }}>{{ user.email }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-4">
+							<label for="atelier">Atelier</label>
+							<select name="atelier" id="atelier" class="form-control">
+								<option value="">Tous</option>
+								{% for atelier in ateliers %}
+									<option value="{{ atelier.id }}" {{ app.request.query.get('atelier') == atelier.id ? 'selected' : '' }}>{{ atelier.nom }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col-md-4">
+							<label for="location">Lieu</label>
+							<select name="location" id="location" class="form-control">
+								<option value="">Tous</option>
+								{% for location in locations %}
+									<option value="{{ location.idLocation }}" {{ app.request.query.get('location') == location.idLocation ? 'selected' : '' }}>{{ location.adresse }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-4">
+							<label for="startTime">Heure de début</label>
+							<input type="time" name="startTime" id="startTime" class="form-control" value="{{ app.request.query.get('startTime') }}">
+						</div>
+						<div class="col-md-4">
+							<label for="capacity">Capacité</label>
+							<input type="number" name="capacity" id="capacity" class="form-control" placeholder="Capacité minimum" value="{{ app.request.query.get('capacity') }}">
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<!-- Event Listing -->
+			<div class="coffee_section_2">
+				<div class="row search-results" id="event-list">
+					{% for event in events %}
+						<div class="col-lg-3 col-md-6 mb-4">
+							<h3 class="types_text">{{ event.name }}</h3>
+							<p class="looking_text">{{ event.description ?: 'Aucune description disponible' }}</p>
+							<p class="looking_text">
+								<strong>Date :</strong>
+								{{ event.date|date('Y-m-d') }}</p>
+							<p class="looking_text">
+								<strong>Prix :</strong>
+								{{ event.price }}
+								TND</p>
+							<div class="read_bt">
+								<a href="{{ path('app_event_show', {'idEvent': event.idEvent}) }}">Détails</a>
+							</div>
+						</div>
+					{% else %}
+						<div class="col-12">
+							<p>Aucun événement à venir.</p>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const form = document.getElementById('search-form');
+const eventContainer = document.getElementById('event-list');
+let timeout;
+
+// Trigger search on input change
+form.addEventListener('input', function (e) {
+clearTimeout(timeout);
+timeout = setTimeout(() => {
+const formData = new FormData(form);
+const query = new URLSearchParams(formData).toString();
+
+eventContainer.classList.add('loading');
+fetch (`/event/search/live?${query}`, {
+headers: {
+'X-Requested-With': 'XMLHttpRequest'
+}
+}).then(response => response.json()).then(data => {
+eventContainer.classList.remove('loading');
+eventContainer.innerHTML = '';
+
+if (!data.success) {
+eventContainer.innerHTML = `<div class="col-12"><p class="alert alert-danger">${
+data.error
+}</p></div>`;
+return;
+}
+
+if (data.results.length === 0) {
+eventContainer.innerHTML = '<div class="col-12"><p>Aucun événement trouvé.</p></div>';
+return;
+}
+
+data.results.forEach(result => {
+const div = document.createElement('div');
+div.className = 'col-lg-3 col-md-6 mb-4';
+div.innerHTML = `
+                                <h3 class="types_text">${
+result.title
+}</h3>
+                                <p class="looking_text">${
+result.description || 'Aucune description disponible'
+}</p>
+                                <p class="looking_text"><strong>Date :</strong> ${
+result.date
+}</p>
+                                <p class="looking_text"><strong>Prix :</strong> ${
+result.price
+}</p>
+                                <div class="read_bt">
+                                    <a href="${
+result.url
+}">Détails</a>
+                                </div>
+                            `;
+eventContainer.appendChild(div);
+});
+}).catch(error => {
+eventContainer.classList.remove('loading');
+console.error('Error:', error);
+eventContainer.innerHTML = '<div class="col-12"><p class="alert alert-danger">Erreur lors de la recherche.</p></div>';
+});
+}, 500); // Debounce for 500ms
+});
+
+// Trigger initial search on page load if query parameters exist
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.toString()) {
+form.dispatchEvent(new Event('input'));
+}
+});
+	</script>
+{% endblock %}

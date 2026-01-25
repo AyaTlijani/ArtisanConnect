@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.asset_base_url: '/uploads/' #
+    stripe_public_key: '%env(STRIPE_PUBLIC_KEY)%'
+    stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -22,3 +25,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # SessionInterface is autowired by default in Symfony, no need for explicit configuration
+    # The following line is not needed as SessionInterface is already available for autowiring
+    # Symfony\Component\HttpFoundation\Session\SessionInterface: ~

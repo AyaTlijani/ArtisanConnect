@@ -1,0 +1,99 @@
+{% extends 'basef.html.twig' %}
+
+{% block title %}Nouvelle Réservation{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Nouvelle Réservation</h4>
+                    </div>
+                    <div class="card-body">
+                        {% for message in app.flashes('error') %}
+                            <div class="alert alert-danger">{{ message }}</div>
+                        {% endfor %}
+
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            <div class="mb-3">
+                                {{ form_label(form.nom, 'Votre nom complet', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.email, 'Votre email', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.telephone, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.telephone) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.date, 'Date de réservation', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.date) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.nombrePersonnes, 'Nombre de personnes', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.nombrePersonnes, {'attr': {
+                                    'class': 'form-control',
+                                    'min': 1,
+                                    'max': 20
+                                }}) }}
+                                {{ form_errors(form.nombrePersonnes) }}
+                                <div class="form-text">Nombre maximum de personnes: 20</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.commentaire, 'Commentaires ou demandes spéciales', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.commentaire, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                                {{ form_errors(form.commentaire) }}
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check-circle me-2"></i>Confirmer la réservation
+                                </button>
+                                <a href="{{ path('app_atelier_index_user') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                                </a>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Client-side form validation
+        (function () {
+            'use strict'
+            
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            const forms = document.querySelectorAll('.needs-validation')
+            
+            // Loop over them and prevent submission
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+{% endblock %}

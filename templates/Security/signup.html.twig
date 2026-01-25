@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Sign Up - ArtisanConnect</title>
+		<link
+		href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+		<!-- Leaflet CSS -->
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+		<style>
+			body {
+				background-color: #f8f9fa;
+				margin: 0;
+				padding: 0;
+				min-height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.auth-wrapper {
+				display: flex;
+				flex-direction: row;
+				width: 100%;
+				max-width: 1000px;
+				background: white;
+				border-radius: 10px;
+				box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+				overflow: hidden;
+			}
+			.auth-image-container {
+				flex: 1;
+				background-size: cover;
+				background-position: center;
+				min-height: 500px;
+				background-image: url('{{ asset('assets/images/2.jpg') }}');
+			}
+			.auth-container {
+				flex: 1;
+				padding: 2.5rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+			.auth-header {
+				text-align: center;
+				margin-bottom: 2rem;
+			}
+			.auth-header h1 {
+				color: #333;
+				font-weight: 600;
+				margin-bottom: 0.5rem;
+			}
+			.auth-header p {
+				color: #6c757d;
+				margin-bottom: 0;
+			}
+			.form-control:focus {
+				border-color: #80bdff;
+				box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+			}
+			.btn-primary {
+				background-color: #007bff;
+				border: none;
+				padding: 12px 24px;
+				font-size: 1.1rem;
+				font-weight: 500;
+				transition: all 0.3s;
+			}
+			.btn-primary:hover {
+				background-color: #0056b3;
+				transform: translateY(-1px);
+			}
+			.form-text {
+				font-size: 0.85rem;
+				color: #6c757d;
+			}
+			.text-danger {
+				font-size: 0.875rem;
+			}
+			.form-check-input:checked {
+				background-color: #007bff;
+				border-color: #007bff;
+			}
+			.form-check-label {
+				cursor: pointer;
+			}
+			.login-link {
+				text-align: center;
+				margin-top: 1rem;
+			}
+			#map {
+				height: 300px;
+				width: 100%;
+				margin-bottom: 1rem;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+			}
+			/* Responsive Design */
+			@media(max-width: 768px) {
+				.auth-wrapper {
+					flex-direction: column;
+					max-width: 90%;
+				}
+				.auth-image-container {
+					min-height: 200px;
+				}
+				#map {
+					height: 200px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="auth-wrapper">
+			<div class="auth-image-container"></div>
+			<div class="auth-container">
+				<div class="auth-header">
+					<h1>Create an Account</h1>
+					<p>Join our community of artisans and clients</p>
+				</div>
+
+				{% for message in app.flashes('error') %}
+					<div class="alert alert-danger" role="alert">
+						{{ message }}
+					</div>
+				{% endfor %}
+
+				{{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+				{{ form_widget(registrationForm._token) }}
+				<div class="row g-3">
+					<div class="col-md-6">
+						<div class="mb-3">
+							{{ form_label(registrationForm.fullName, 'Full Name', {'label_attr': {'class': 'form-label'}}) }}
+							{{ form_widget(registrationForm.fullName, {'attr': {'class': 'form-control'}}) }}
+							{{ form_errors(registrationForm.fullName) }}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							{{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+							{{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+							{{ form_errors(registrationForm.email) }}
+						</div>
+					</div>
+				</div>
+
+				<div class="row g-3">
+					<div class="col-md-6">
+						<div class="mb-3">
+							{{ form_label(registrationForm.phoneNumber, 'Phone Number', {'label_attr': {'class': 'form-label'}}) }}
+							{{ form_widget(registrationForm.phoneNumber, {'attr': {'class': 'form-control'}}) }}
+							{{ form_errors(registrationForm.phoneNumber) }}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							{{ form_label(registrationForm.username, 'Username', {'label_attr': {'class': 'form-label'}}) }}
+							{{ form_widget(registrationForm.username, {'attr': {'class': 'form-control'}}) }}
+							{{ form_errors(registrationForm.username) }}
+							<div class="form-text">Max 8 characters, letters and numbers only</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row g-3">
+					<div class="col-md-6">
+						<div class="mb-3">
+							{{ form_label(registrationForm.plainPassword.first, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+							{{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
+							{{ form_errors(registrationForm.plainPassword.first) }}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							{{ form_label(registrationForm.plainPassword.second, 'Repeat Password', {'label_attr': {'class': 'form-label'}}) }}
+							{{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
+							{{ form_errors(registrationForm.plainPassword.second) }}
+						</div>
+					</div>
+				</div>
+
+				<div class="mb-4">
+					{{ form_label(registrationForm.accountType, 'Account Type', {'label_attr': {'class': 'form-label d-block'}}) }}
+					<div class="d-flex gap-4">
+						{% for child in registrationForm.accountType %}
+							<div class="form-check">
+								{{ form_widget(child, {'attr': {'class': 'form-check-input'}}) }}
+								{{ form_label(child, null, {'label_attr': {'class': 'form-check-label'}}) }}
+							</div>
+						{% endfor %}
+					</div>
+					{{ form_errors(registrationForm.accountType) }}
+				</div>
+
+				<!-- Map Section -->
+				<div class="mb-3">
+					<label class="form-label">Select Location</label>
+					<div id="map"></div>
+					{{ form_widget(registrationForm.location) }}
+					<small class="form-text">Click on the map to select your location in Tunisia.</small>
+				</div>
+
+				<div class="d-grid gap-2">
+					<button type="submit" class="btn btn-primary">Create Account</button>
+				</div>
+				{{ form_end(registrationForm) }}
+				<div class="login-link">
+					Already have an account?
+					<a href="{{ path('app_sign_in') }}">Sign in</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Leaflet JS -->
+		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+		<script>
+			document.addEventListener('DOMContentLoaded', function () { // Initialize the map
+var map = L.map('map').setView([
+35.8622, 10.2238
+], 6);
+// Center on Tunisia
+
+// Add OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+maxZoom: 18,
+attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+// Restrict map to Tunisia bounds (approximate)
+var tunisiaBounds = L.latLngBounds(L.latLng(30.2304, 7.5254), // Southwest corner
+L.latLng(37.2871, 11.9219) // Northeast corner
+);
+map.setMaxBounds(tunisiaBounds);
+map.on('drag', function () {
+map.panInsideBounds(tunisiaBounds, {animate: false});
+});
+
+// Add a marker on click
+var marker;
+map.on('click', function (e) {
+if (marker) {
+map.removeLayer(marker); // Remove existing marker
+}marker = L.marker(e.latlng).addTo(map);
+
+// Use reverse geocoding to get the location name (approximate)
+fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${
+e.latlng.lat
+}&lon=${
+e.latlng.lng
+}&zoom=10&addressdetails=1`).then(response => response.json()).then(data => {
+if (data && data.address) {
+var locationName = data.address.city || data.address.town || data.address.village || data.address.state;
+if (locationName) {
+document.querySelector('.location-field').value = locationName;
+} else {
+document.querySelector('.location-field').value = 'Unknown Location';
+}
+}
+}).catch(error => {
+console.error('Error fetching location:', error);
+document.querySelector('.location-field').value = 'Unknown Location';
+});
+});
+});
+		</script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	</body>
+</html>

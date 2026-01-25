@@ -1,0 +1,6 @@
+parameters:
+    images_directory: '%kernel.project_dir%/public/uploads'
+    uploads_directory: '%kernel.project_dir%/public/uploads'
+    
+    # Add any other parameters you might need
+    locale: 'fr'

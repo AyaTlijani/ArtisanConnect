@@ -1,0 +1,213 @@
+{% extends 'artisan/base.html.twig' %}
+
+{% block page_title %}Commande #{{ order.orderId }}{% endblock %}
+{% block breadcrumb_active %}{{ order.orderId }}{% endblock %}
+
+{% block stylesheets %n    {{ parent() }}
+    <style>
+        .order-details-card {
+            border-left: 4px solid #6c757d;
+        }
+        .order-item {
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50rem;
+        }
+        .status-pending { background-color: #ffc107; color: #212529; }
+        .status-paid { background-color: #0d6efd; color: white; }
+        .status-shipped { background-color: #6f42c1; color: white; }
+        .status-delivered { background-color: #198754; color: white; }
+        .status-cancelled { background-color: #dc3545; color: white; }
+        .product-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+
+{% block artisan_content %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card order-details-card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Détails de la commande #{{ order.orderId }}</h5>
+                    <div>
+                        <span class="me-2">Statut:</span>
+                        {% set statusClass = '' %}
+                        {% if order.status == 'pending' %}
+                            {% set statusClass = 'status-pending' %}
+                        {% elseif order.status == 'paid' %}
+                            {% set statusClass = 'status-paid' %}
+                        {% elseif order.status == 'shipped' %}
+                            {% set statusClass = 'status-shipped' %}
+                        {% elseif order.status == 'delivered' %}
+                            {% set statusClass = 'status-delivered' %}
+                        {% elseif order.status == 'cancelled' %}
+                            {% set statusClass = 'status-cancelled' %}
+                        {% endif %}
+                        <span class="status-badge {{ statusClass }}">
+                            {{ order.status|trans|capitalize }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Informations client</h6>
+                            <p class="mb-1"><strong>Nom:</strong> {{ order.fullName }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ order.email }}</p>
+                            <p class="mb-1"><strong>Téléphone:</strong> {{ order.phone }}</p>
+                            <p class="mb-0"><strong>Adresse:</strong> {{ order.address }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Détails de la commande</h6>
+                            <p class="mb-1"><strong>Date de commande:</strong> {{ order.createdAt|date('d/m/Y H:i') }}</p>
+                            <p class="mb-1"><strong>Date de livraison prévue:</strong> {{ order.deliveryDate ? order.deliveryDate|date('d/m/Y') : 'Non spécifiée' }}</p>
+                            <p class="mb-1"><strong>Méthode de paiement:</strong> {{ order.paymentMethod|capitalize }}</p>
+                            {% if order.commande and order.commande.livreur %}
+                                <p class="mb-0">
+                                    <strong>Livreur assigné:</strong> {{ order.commande.livreur }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Articles commandés</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in order.items %}
+                        {% if item.artisan == app.user %}
+                            <div class="order-item">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0 me-3">
+                                        <img src="{{ item.image ? asset('uploads/products/' ~ item.image) : asset('assets/images/products/default-product.jpg') }}" 
+                                             alt="{{ item.name }}" class="product-img">
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ item.name }}</h6>
+                                        <p class="mb-1 text-muted">Quantité: {{ item.quantity }}</p>
+                                        <p class="mb-0">{{ item.price|number_format(3, '.', ' ') }} TND</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">{{ (item.price * item.quantity)|number_format(3, '.', ' ') }} TND</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.status != 'cancelled' and order.status != 'delivered' %}
+                        <div class="mb-4">
+                            <h6 class="mb-3">Assigner un livreur</h6>
+                            <form action="{{ path('app_artisan_order_assign_livreur', {'id': order.orderId}) }}" method="post" class="mb-3">
+                                <div class="mb-3">
+                                    <select name="livreur" class="form-select" required>
+                                        <option value="">Sélectionner un livreur</option>
+                                        {% for livreur in livreurs %}
+                                            <option value="{{ livreur.id }}" {{ order.commande and order.commande.livreur == livreur.nom ? 'selected' : '' }}>
+                                                {{ livreur.nom }} ({{ livreur.vehicule }}) - {{ livreur.disponible ? 'Disponible' : 'Indisponible' }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-truck me-1"></i> Assigner le livreur
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="mb-3">Mettre à jour le statut</h6>
+                            <form action="{{ path('app_artisan_order_update_status', {'id': order.orderId}) }}" method="post">
+                                <div class="mb-3">
+                                    <select name="status" class="form-select" required>
+                                        <option value="En préparation" {{ order.commande and order.commande.statut == 'En préparation' ? 'selected' : '' }}>En préparation</option>
+                                        <option value="En cours de livraison" {{ order.commande and order.commande.statut == 'En cours de livraison' ? 'selected' : '' }}>En cours de livraison</option>
+                                        <option value="Livrée" {{ order.commande and order.commande.statut == 'Livrée' ? 'selected' : '' }}>Livrée</option>
+                                        <option value="Annulée" {{ order.commande and order.commande.statut == 'Annulée' ? 'selected' : '' }}>Annuler la commande</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-sync-alt me-1"></i> Mettre à jour le statut
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sous-total:</span>
+                            <span>{{ order.total|number_format(3, '.', ' ') }} TND</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Livraison:</span>
+                            <span>Gratuite</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total:</span>
+                            <span>{{ order.total|number_format(3, '.', ' ') }} TND</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-3">
+                <a href="{{ path('app_artisan_orders_index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Handle status change confirmation
+            const statusForm = document.querySelector('form[action$="update-status"]');
+            if (statusForm) {
+                statusForm.addEventListener('submit', function(e) {
+                    const statusSelect = this.querySelector('select[name="status"]');
+                    if (statusSelect.value === 'Annulée') {
+                        if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible.')) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

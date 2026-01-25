@@ -1,0 +1,44 @@
+{% set entityId = entity.idProduit is defined ? entity.idProduit : (entity.idAtelier is defined ? entity.idAtelier : entity.id) %}
+<div class="rating-stars" data-entity-type="{{ entityType }}" data-entity-id="{{ entityId }}" data-average-rating="{{ entity.averageRating ?? 0 }}">
+    <div class="stars">
+        {% for i in 1..5 %}
+            {% if i <= (entity.averageRating|default(0)) %}
+                <i class="fas fa-star" data-rating="{{ i }}"></i>
+            {% else %}
+                <i class="far fa-star" data-rating="{{ i }}"></i>
+            {% endif %}
+        {% endfor %}
+        <span class="ms-1 small text-muted rating-count">({{ entity.ratings|length }})</span>
+    </div>
+</div>
+
+<style>
+.rating-stars {
+    display: inline-block;
+    font-size: 1.25rem;
+    line-height: 1;
+    margin: 0.5rem 0;
+    cursor: pointer;
+}
+.rating-stars .stars {
+    display: inline-flex;
+    align-items: center;
+}
+.rating-stars .fa-star {
+    color: #ffc107;
+    margin-right: 0.1rem;
+    transition: all 0.2s ease;
+}
+.rating-stars .far.fa-star {
+    color: #ddd;
+}
+.rating-stars:hover .far.fa-star {
+    color: #ffc107;
+    opacity: 0.5;
+}
+.rating-stars .rating-count {
+    margin-left: 5px;
+    font-size: 0.9em;
+    color: #666;
+}
+</style>

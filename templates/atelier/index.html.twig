@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Ateliers{% endblock %}
+
+{% block breadcrumb %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Tableau de bord</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Ateliers</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Liste des Ateliers</h5>
+                        <a href="{{ path('app_atelier_new') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Ajouter un Atelier
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nom</th>
+                                        <th>Prix</th>
+                                        <th>Quantité</th>
+                                        <th>Disponibilité</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if ateliers %}
+                                        {% for atelier in ateliers %}
+                                            <tr>
+                                                <td>{{ atelier.idAtelier }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if atelier.image %}
+                                                            <img src="{{ vich_uploader_asset(atelier, 'imageFile') }}" 
+                                                                 class="rounded me-2" 
+                                                                 style="width: 40px; height: 40px; object-fit: cover;" 
+                                                                 alt="{{ atelier.nom }}">
+                                                        {% else %}
+                                                            <div class="bg-light rounded d-flex align-items-center justify-content-center me-2" 
+                                                                 style="width: 40px; height: 40px;">
+                                                                <i class="fas fa-image text-muted"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                        <div>
+                                                            <div class="fw-medium">{{ atelier.nom }}</div>
+                                                            <small class="text-muted">{{ atelier.description|u.truncate(30, '...') }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{{ atelier.prix|number_format(2, ',', ' ') }} TND</td>
+                                                <td>{{ atelier.quantite }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ atelier.disponibilite and atelier.quantite > 0 ? 'success' : 'danger' }}">
+                                                        {{ atelier.disponibilite and atelier.quantite > 0 ? 'Disponible' : 'Indisponible' }}
+                                                    </span>
+                                                </td>
+                                                <td class="table-actions text-end">
+                                                    <a href="{{ path('app_atelier_edit', {'idAtelier': atelier.idAtelier}) }}" 
+                                                       class="btn btn-sm btn-outline-primary me-1"
+                                                       data-bs-toggle="tooltip" 
+                                                       title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="post" 
+                                                          action="{{ path('app_atelier_delete', {'idAtelier': atelier.idAtelier}) }}" 
+                                                          class="d-inline" 
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet atelier ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ atelier.idAtelier) }}">
+                                                        <button type="submit" 
+                                                                class="btn btn-sm btn-outline-danger"
+                                                                data-bs-toggle="tooltip" 
+                                                                title="Supprimer">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="fas fa-tools fa-3x d-block mb-2"></i>
+                                                Aucun atelier enregistré pour le moment
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %}

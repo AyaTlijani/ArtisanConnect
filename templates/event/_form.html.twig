@@ -1,0 +1,71 @@
+{{ form_start(form) }}
+    {{ form_errors(form) }} {# Display global form errors #}
+
+    <div class="form-group">
+        {{ form_label(form.name) }}
+        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.name) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.description) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.date) }}
+        {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.date) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.startTime) }}
+        {{ form_widget(form.startTime, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.startTime) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.endTime) }}
+        {{ form_widget(form.endTime, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.endTime) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.capacity) }}
+        {{ form_widget(form.capacity, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.capacity) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.price) }}
+        {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.price) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.status) }}
+        {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.status) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.organizer) }}
+        {{ form_widget(form.organizer, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.organizer) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.atelier) }}
+        {{ form_widget(form.atelier, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.atelier) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.location) }}
+        {{ form_widget(form.location, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.location) }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ button_label|default('Save') }}</button>
+{{ form_end(form) }}

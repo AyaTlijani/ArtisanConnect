@@ -1,0 +1,266 @@
+{% extends 'basef.html.twig' %}
+
+{% block title %}Votre Panier{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <h2 class="mb-4">Votre Panier</h2>
+        {% if paniers|length > 0 %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produit</th>
+                            <th class="text-end">Prix unitaire</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for panier in paniers %}
+                            <tr id="cart-item-{{ panier.idPanier }}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ panier.idProduit.image ? asset('uploads/produits/' ~ panier.idProduit.image) : asset('assets/images/1.jpg') }}" 
+                                             alt="{{ panier.idProduit.nom }}" 
+                                             class="img-thumbnail me-3" 
+                                             style="width: 80px; height: 80px; object-fit: cover;">
+                                        <div>
+                                            <h6 class="mb-0">{{ panier.idProduit.nom }}</h6>
+                                            <small class="text-muted">SKU: {{ panier.idProduit.idProduit }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">{{ panier.idProduit.prix|number_format(3, '.', ' ') }} TND</td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex align-items-center">
+                                        <form action="{{ path('app_cart_update', {'id': panier.idPanier}) }}" method="post" class="update-quantity-form d-inline me-2">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('update' ~ panier.idPanier) }}">
+                                            <input type="hidden" name="quantity" value="{{ panier.quantite - 1 }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary btn-minus" {{ panier.quantite <= 1 ? 'disabled' : '' }}>-</button>
+                                        </form>
+                                        <span class="mx-2 quantity-display">{{ panier.quantite }}</span>
+                                        <form action="{{ path('app_cart_update', {'id': panier.idPanier}) }}" method="post" class="update-quantity-form d-inline ms-2">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('update' ~ panier.idPanier) }}">
+                                            <input type="hidden" name="quantity" value="{{ panier.quantite + 1 }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary btn-plus" {{ panier.quantite >= panier.idProduit.quantite ? 'disabled' : '' }}>+</button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td class="text-end">{{ panier.prixTotal|number_format(3, '.', ' ') }} TND</td>
+                                <td>
+                                    <form method="post" action="{{ path('app_cart_remove', {'id': panier.idPanier}) }}" class="remove-from-cart-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ panier.idPanier) }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Sous-total</td>
+                            <td colspan="2" class="text-end fw-bold">{{ paniers|reduce((total, item) => total + item.prixTotal, 0)|number_format(3, '.', ' ') }} TND</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end">Livraison</td>
+                            <td colspan="2" class="text-end">Gratuite</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td colspan="3" class="text-end fw-bold fs-5">Total</td>
+                            <td colspan="2" class="text-end fw-bold fs-5">{{ paniers|reduce((total, item) => total + item.prixTotal, 0)|number_format(3, '.', ' ') }} TND</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('app_shop_index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Continuer vos achats
+                </a>
+                <a href="{{ path('app_checkout') }}" class="btn btn-primary">
+                    Passer la commande <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                <h4>Votre panier est vide</h4>
+                <p class="text-muted">Ajoutez des articles à votre panier pour commencer vos achats</p>
+                <a href="{{ path('app_shop_index') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-shopping-bag me-2"></i>Parcourir les produits
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toastEl = document.getElementById('cartToast');
+            const toastBody = toastEl.querySelector('.toast-body');
+            const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+            
+            // Set message and style based on type
+            toastBody.textContent = message;
+            toastEl.className = 'toast align-items-center text-white border-0';
+            toastEl.classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
+            
+            // Show the toast
+            toast.show();
+        }
+        
+        // Handle quantity update forms
+        document.querySelectorAll('.update-quantity-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const submitButton = this.querySelector('button[type="submit"]');
+                const originalHtml = submitButton.innerHTML;
+                
+                // Show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the displayed quantity and total
+                        const quantityDisplay = form.closest('tr').querySelector('.quantity-display');
+                        const totalDisplay = form.closest('tr').querySelector('.item-total');
+                        const cartTotalDisplay = document.querySelector('.cart-total');
+                        
+                        if (quantityDisplay) quantityDisplay.textContent = data.quantity;
+                        if (totalDisplay) totalDisplay.textContent = data.itemTotal.toFixed(3) + ' TND';
+                        if (cartTotalDisplay) cartTotalDisplay.textContent = data.cartTotal.toFixed(3) + ' TND';
+                        
+                        // Update button states
+                        const minusBtn = form.querySelector('.btn-minus');
+                        const plusBtn = form.closest('td').nextElementSibling.querySelector('.btn-plus');
+                        
+                        if (minusBtn) minusBtn.disabled = data.quantity <= 1;
+                        if (plusBtn) plusBtn.disabled = data.quantity >= data.productStock;
+                        
+                        showToast('Cart updated');
+                    } else {
+                        showToast(data.message || 'Error updating cart', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred', 'error');
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalHtml;
+                });
+            });
+        });
+        
+        // Handle remove from cart forms
+        document.querySelectorAll('.remove-from-cart-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const submitButton = this.querySelector('button[type="submit"]');
+                const originalText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success notification
+                        if (typeof showRemoveFromCart === 'function') {
+                            showRemoveFromCart(data.productName || 'Le produit');
+                        }
+                        
+                        // Remove the row from the table
+                        const row = document.getElementById(`cart-item-${data.id || ''}`);
+                        if (row) {
+                            row.style.opacity = '0';
+                            setTimeout(() => row.remove(), 300);
+                        }
+                        
+                        // Update cart count in navigation
+                        const cartCount = document.querySelector('.cart-count');
+                        if (cartCount && data.cartCount !== undefined) {
+                            cartCount.textContent = data.cartCount;
+                            if (data.cartCount === 0) {
+                                window.location.reload(); // Reload to show empty cart message
+                            }
+                        }
+                    } else {
+                        // Show error message
+                        if (typeof showCartNotification === 'function') {
+                            showCartNotification(data.message || 'Une erreur est survenue', 'error');
+                        }
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (typeof showCartNotification === 'function') {
+                        showCartNotification('Une erreur est survenue lors de la suppression du produit', 'error');
+                    }
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalText;
+                });
+            });
+        });
+    });
+    </script>
+    
+    <style>
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .img-thumbnail {
+        padding: 0.25rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .btn-outline-danger {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .btn-outline-danger:hover {
+        transform: scale(1.1);
+    }
+    </style>
+{% endblock %}

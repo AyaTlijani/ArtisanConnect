@@ -1,0 +1,73 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
+    <div class="row g-3">
+        {% for field in form %}
+            {% if field.vars.name != '_token' %}
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        {{ form_label(field, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        
+                        {% if field.vars.name == 'imageFile' %}
+                            <div class="input-group">
+                                {{ form_widget(field.file, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (field.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                        'accept': 'image/jpeg,image/png,image/gif'
+                                    }
+                                }) }}
+                                {% if field.delete is defined %}
+                                    <div class="form-check mt-2">
+                                        {{ form_widget(field.delete, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_label(field.delete, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% elseif field.vars.block_prefixes[1] == 'choice' %}
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-select' ~ (field.vars.errors|length > 0 ? ' is-invalid' : '')
+                                }
+                            }) }}
+                        {% elseif field.vars.block_prefixes[1] == 'checkbox' %}
+                            <div class="form-check">
+                                {{ form_widget(field, {
+                                    'attr': {
+                                        'class': 'form-check-input' ~ (field.vars.errors|length > 0 ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                {{ form_label(field, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                        {% else %}
+                            {{ form_widget(field, {
+                                'attr': {
+                                    'class': 'form-control' ~ (field.vars.errors|length > 0 ? ' is-invalid' : ''),
+                                    'placeholder': field.vars.attr.placeholder|default('')
+                                }
+                            }) }}
+                        {% endif %}
+                        
+                        {% if field.vars.attr.help is defined %}
+                            <div class="form-text">{{ field.vars.attr.help }}</div>
+                        {% endif %}
+                        
+                        {% if field.vars.errors|length > 0 %}
+                            <div class="invalid-feedback">
+                                {% for error in field.vars.errors %}
+                                    {{ error.message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="ti ti-check me-1"></i> {{ button_label|default('Enregistrer') }}
+        </button>
+        <a href="{{ cancel_path|default(path('app_atelier_index')) }}" class="btn btn-secondary">
+            <i class="ti ti-arrow-left me-1"></i> Annuler
+        </a>
+    </div>
+{{ form_end(form) }}

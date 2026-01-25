@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+     {% block title %}Détails de l'Événement{% endblock %}
+
+     {% block body %}
+         <h1 class="mb-4">{{ event.name }}</h1>
+         <div class="card">
+             <div class="card-body">
+                 <p><strong>Description :</strong> {{ event.description ?: 'N/A' }}</p>
+                 <p><strong>Date :</strong> {{ event.date|date('Y-m-d') }}</p>
+                 <p><strong>Heure de début :</strong> {{ event.startTime|date('H:i') }}</p>
+                 <p><strong>Heure de fin :</strong> {{ event.endTime ? event.endTime|date('H:i') : 'N/A' }}</p>
+                 <p><strong>Capacité :</strong> {{ event.capacity }}</p>
+                 <p><strong>Prix :</strong> {{ event.price }} TND</p>
+                 <p><strong>Statut :</strong> {{ event.status }}</p>
+                 <p><strong>Organisateur :</strong> {{ event.organizer.email }}</p>
+                 <p><strong>Atelier :</strong> {{ event.atelier ? event.atelier.nom : 'N/A' }}</p>
+                 <p><strong>Lieu :</strong> {{ event.location ? event.location.adresse : 'N/A' }}</p>
+                 <a href="{{ path('admin_event_edit', {'id': event.idEvent}) }}" class="btn btn-warning">Modifier</a>
+                 <a href="{{ path('admin_event_index') }}" class="btn btn-secondary">Retour à la liste</a>
+             </div>
+         </div>
+     {% endblock %}

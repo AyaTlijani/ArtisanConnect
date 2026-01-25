@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reservations{% endblock %}
+
+{% block body %}
+    <h1>Reservations</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Atelier</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Nombre de Personnes</th>
+                <th>Numéro de Téléphone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+                <tr>
+                    <td>{{ reservation.id }}</td>
+                    <td>{{ reservation.service.nom }}</td>
+                    <td>{{ reservation.date ? reservation.date|date('Y-m-d') : '' }}</td>
+                    <td>{{ reservation.heure ? reservation.heure|date('H:i') : '' }}</td>
+                    <td>{{ reservation.nombrePersonnes }}</td>
+                    <td>{{ reservation.numeroTelephone }}</td>
+                    <td>
+                        <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}" class="btn btn-info">Show</a>
+                        {{ include('reservation/_delete_form.html.twig', {'reservation': reservation}) }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'basef.html.twig' %}
+
+{% block title %}Boutique{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <h1 class="mb-4">Notre Boutique</h1>
+        <div class="row">
+            {% for produit in produits %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if produit.image %}
+                            <img src="{{ vich_uploader_asset(produit, 'imageFile') }}" class="card-img-top" alt="{{ produit.nom }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <img src="{{ asset('assets/images/1.jpg') }}" class="card-img-top" alt="{{ produit.nom }}" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ produit.nom }}</h5>
+                            <p class="card-text flex-grow-1">{{ produit.description|u.truncate(100, '...') }}</p>
+                            
+                            <!-- Star Rating -->
+                            <div class="mb-2">
+                                {% include 'components/_rating_stars.html.twig' with {'entity': produit, 'entityType': 'produit'} %}
+                                <span class="text-muted small ms-2">({{ produit.ratings|length }})</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <div>
+                                    <span class="h5 text-primary mb-0">{{ produit.prix }} TND</span>
+                                    {% if produit.quantite > 0 %}
+                                        <span class="badge bg-success ms-2">En stock</span>
+                                    {% else %}
+                                        <span class="badge bg-danger ms-2">Rupture</span>
+                                    {% endif %}
+                                </div>
+                                <a href="{{ path('app_shop_show', {'idProduit': produit.idProduit}) }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i> Découvrir
+                                </a>
+                            </div>
+                            
+                            <!-- Add to Cart Button -->
+                            {% if produit.isDisponibilite and produit.quantite > 0 %}
+                                <form action="{{ path('app_cart_add', {'id': produit.idProduit}) }}" method="post" class="mt-2">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart_' ~ produit.idProduit) }}">
+                                    <input type="hidden" name="quantite" value="1">
+                                    <button type="submit" class="btn btn-primary w-100 add-to-cart-btn" data-product-id="{{ produit.idProduit }}">
+                                        <i class="fas fa-shopping-cart me-1"></i> Ajouter au panier
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary w-100 mt-2" disabled>
+                                    <i class="fas fa-times-circle me-1"></i> Indisponible
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+			{% endfor %}
+		</div>
+	</div>
+{% endblock %}

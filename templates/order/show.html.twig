@@ -1,0 +1,220 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la Commande #{{ order.orderId is defined ? order.orderId : order.id }}{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <h1 class="mb-4">Commande #{{ order.orderId is defined ? order.orderId : order.id }}</h1>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('warning') %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Suivi de commande</h5>
+                        {% if order.getTrackingNumber() %}
+                            <div class="tracking-info">
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-truck me-1"></i>
+                                    {{ order.getCarrier() ?: 'Numéro de suivi' }}: {{ order.getTrackingNumber() }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item {{ order.status is defined and order.status in ['PAID', 'SHIPPED', 'DELIVERED', 'Livrée'] ? 'completed' : '' }}">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <h6>Commande confirmée</h6>
+                                    <p class="text-muted mb-0">Votre commande a été enregistrée avec succès</p>
+                                    <small class="text-muted">
+                                        {{ order.createdAt is defined ? order.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                                    </small>
+                                    {% if order.estimatedDeliveryDate is defined and order.estimatedDeliveryDate %}
+                                        <div class="mt-2">
+                                            <i class="far fa-calendar-check text-primary"></i>
+                                            <small class="text-muted">
+                                                Livraison estimée: {{ order.estimatedDeliveryDate is iterable ? order.estimatedDeliveryDate|date('d/m/Y') : order.estimatedDeliveryDate }}
+                                            </small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="timeline-item {{ (order.commande is not null and (order.commande.statut == 'En préparation' or order.commande.statut == 'En livraison')) or order.status in ['SHIPPED', 'DELIVERED'] ? 'completed' : '' }}">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <h6>En préparation</h6>
+                                    <p class="text-muted mb-0">Votre commande est en cours de préparation</p>
+                                    {% if order.commande is not null and order.commande.statut == 'En préparation' %}
+                                        <small class="text-muted">En attente d'assignation d'un livreur</small>
+                                    {% endif %}
+                                    {% if order.getShippedAt() %}
+                                        <div class="mt-2">
+                                            <i class="far fa-clock text-primary"></i>
+                                            <small class="text-muted">Expédiée le: {{ order.getShippedAt()|date('d/m/Y H:i') }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="timeline-item {{ (order.commande is not null and order.commande.statut == 'En livraison') or order.status in ['SHIPPED', 'DELIVERED'] ? 'completed' : '' }}">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <h6>En livraison</h6>
+                                    <p class="text-muted mb-0">Votre commande est en cours de livraison</p>
+                                    {% if order.commande is not null and order.commande.livreur is not null %}
+                                        <small class="text-muted">Livreur: {{ order.commande.livreur.nom }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="timeline-item {{ order.status == 'DELIVERED' ? 'completed' : '' }}">
+                                <div class="timeline-point"></div>
+                                <div class="timeline-content">
+                                    <h6>Livrée</h6>
+                                    <p class="text-muted mb-0">Votre commande a été livrée avec succès</p>
+                                    {% if order.getDeliveredAt() %}
+                                        <div class="mt-2">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            <small class="text-muted">Livrée le: {{ order.getDeliveredAt()|date('d/m/Y H:i') }}</small>
+                                        </div>
+                                    {% endif %}
+                                    {% if order.getTrackingNumber() and order.getCarrier() %}
+                                        <div class="mt-2">
+                                            <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#trackingModal">
+                                                <i class="fas fa-map-marked-alt me-1"></i> Suivre ma commande
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Articles commandés</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-borderless mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produit</th>
+                                    <th class="text-center">Quantité</th>
+                                    <th class="text-end">Prix unitaire</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items %}
+                                    <tr>
+                                        <td>{{ item.nomProduit }}</td>
+                                        <td class="text-center">{{ item.quantite }}</td>
+                                        <td class="text-end">{{ item.prix|number_format(2, ',', ' ') }} TND</td>
+                                        <td class="text-end">{{ (item.prix * item.quantite)|number_format(2, ',', ' ') }} TND</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold">Total</td>
+                                    <td class="text-end fw-bold">{{ order.getTotal()|number_format(2, ',', ' ') }} TND</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Détails de la commande</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong>Date de commande :</strong>
+                                <span class="float-end">{{ order.getCreatedAt()|date('d/m/Y H:i') }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Statut :</strong>
+                                <span class="float-end">{{ order.status|trans|capitalize }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Méthode de paiement :</strong>
+                                <span class="float-end">{{ order.paymentMethod|capitalize }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Date de livraison estimée :</strong>
+                                <span class="float-end">{{ order.deliveryDate|date('d/m/Y') }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations de livraison</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Nom :</strong> {{ order.fullName }}</p>
+                        <p class="mb-1"><strong>Adresse :</strong> {{ order.address }}</p>
+                        <p class="mb-1"><strong>Email :</strong> {{ order.email }}</p>
+                        <p class="mb-0"><strong>Téléphone :</strong> {{ order.phone }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .timeline-point {
+            position: absolute;
+            left: -30px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 50%;
+            border: 2px solid #e9ecef;
+        }
+        .timeline-item.completed .timeline-point {
+            background: #28a745;
+            border-color: #28a745;
+        }
+        .timeline-content h6 {
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+    </style>
+{% endblock %}

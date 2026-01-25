@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User #{{ user.idUser }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2>User Details</h2>
+                        <div class="btn-group">
+                            <a href="{{ path('app_user_edit', {'idUser': user.idUser}) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to list
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">ID:</div>
+                            <div class="col-md-8">{{ user.idUser }}</div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">Username:</div>
+                            <div class="col-md-8">{{ user.username }}</div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">Full Name:</div>
+                            <div class="col-md-8">{{ user.fullName }}</div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">Email:</div>
+                            <div class="col-md-8">{{ user.email }}</div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">Phone Number:</div>
+                            <div class="col-md-8">{{ user.phoneNumber }}</div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">Role:</div>
+                            <div class="col-md-8">
+                                <span class="badge bg-{{ user.role == 'ADMIN' ? 'danger' : (user.role == 'ARTISAN' ? 'warning' : 'primary') }}">
+                                    {{ user.role }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 fw-bold">Created At:</div>
+                            <div class="col-md-8">{{ user.createdAt|date('Y-m-d H:i:s') }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 fw-bold">Last Updated:</div>
+                            <div class="col-md-8">{{ user.updatedAt|date('Y-m-d H:i:s') }}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <form method="post" action="{{ path('app_user_delete', {'idUser': user.idUser}) }}" onsubmit="return confirm('Are you sure you want to delete this user?')" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.idUser) }}">
+                            <button class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete User
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .badge {
+            font-size: 0.9em;
+            padding: 0.5em 0.8em;
+        }
+    </style>
+{% endblock %}
