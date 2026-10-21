@@ -3,41 +3,48 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\GoogleUtilisateur;
-use App\Form\LoginFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class SignInController extends AbstractController
 {
-    private EntityManagerInterface $entityManager;
-    private AuthenticationUtils $authenticationUtils;
+    private $entityManager;
 
-    public function __construct(
-        EntityManagerInterface $entityManager,
-        AuthenticationUtils $authenticationUtils
-    ) {
+    public function __construct(EntityManagerInterface $entityManager)
+    {
         $this->entityManager = $entityManager;
-        $this->authenticationUtils = $authenticationUtils;
     }
 
-    #[Route('/signin', name: 'app_sign_in', methods: ['GET', 'POST'])]
-    public function signIn(Request $request, AuthenticationUtils $authenticationUtils, CsrfTokenManagerInterface $csrfTokenManager): Response
+    #[Route('/signin', name: 'app_sign_in')]
+    public function index(AuthenticationUtils $authenticationUtils): Response
     {
+        // If user is already logged in, redirect based on role
+        if ($this->getUser()) {
+            $user = $this->getUser();
+            
+            // Check if user has ROLE_ARTISAN or ROLE_ADMIN
+            if (in_array('ROLE_ARTISAN', $user->getRoles()) || in_array('ROLE_ADMIN', $user->getRoles())) {
+                return $this->redirectToRoute('admin_event_index');
+            }
+            
+            // Default redirect for other roles (CLIENT)
+            return $this->redirectToRoute('app_home');
+        }
+
+        // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
+        // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('Security/signin.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error,
-            'csrf_token' => $csrfTokenManager->getToken('authenticate')->getValue()
+            'error' => $error ? $error->getMessage() : null,
         ]);
     }
+
+
 }

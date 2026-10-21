@@ -20,7 +20,7 @@ class Paiement
     #[Assert\NotNull(message: 'Client cannot be empty.')]
     private ?User $client = null;
 
-    #[ORM\ManyToOne(targetEntity: Orders::class)]
+    #[ORM\ManyToOne(targetEntity: Orders::class, inversedBy: 'paiements')]
     #[ORM\JoinColumn(name: 'idCommande', referencedColumnName: 'order_id', nullable: false)]
     #[Assert\NotBlank(message: 'Order cannot be empty.')]
     private ?Orders $order = null;

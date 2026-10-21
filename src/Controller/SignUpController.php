@@ -46,16 +46,10 @@ class SignUpController extends AbstractController
                 // Get the selected role from the form
                 $role = $form->get('accountType')->getData();
                 
-                // Debug log the role
-                error_log('Selected role: ' . $role);
-                
                 // Set basic user properties with the role
                 $user->setRole($role);
                 $user->setCreatedAt(new \DateTime());
                 $user->setUpdatedAt(new \DateTime());
-                
-                // Debug the final role being set
-                error_log('User role after set: ' . $user->getRole());
                 
                 // Encode and set the password
                 $plainPassword = $form->get('plainPassword')->getData();
@@ -65,14 +59,6 @@ class SignUpController extends AbstractController
                 
                 $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
-                
-                // Debug log user data before save
-                error_log('User data before save: ' . print_r([
-                    'username' => $user->getUsername(),
-                    'email' => $user->getEmail(),
-                    'role' => $user->getRole(),
-                    'roles' => $user->getRoles()
-                ], true));
                 
                 // Save the user
                 $this->entityManager->persist($user);
@@ -121,7 +107,7 @@ class SignUpController extends AbstractController
             return $this->redirectToRoute('app_sign_up');
         }
 
-        return $this->render('check_email.html.twig', [
+        return $this->render('Security/CheckMail.html.twig', [
             'email' => $email,
         ]);
     }

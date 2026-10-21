@@ -49,6 +49,6 @@ class PasswordController extends AbstractController
             }
         }
 
-        return $this->render('2Pass.html.twig');
+        return $this->render('Security/2Pass.html.twig');
     }
 }

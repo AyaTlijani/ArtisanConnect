@@ -47,8 +47,8 @@ final class CheckMailController extends AbstractController
             return $this->redirectToRoute('app_sign_up');
         }
 
-        return $this->render('CheckMail.html.twig', [
-            'userEmail' => $userEmail,
+        return $this->render('Security/CheckMail.html.twig', [
+            'email' => $userEmail,
         ]);
     }
 
@@ -63,6 +63,6 @@ final class CheckMailController extends AbstractController
                 $entityManager->flush();
             }
         }
-        return $this->render('verify_success.html.twig');
+        return $this->render('Security/verify_success.html.twig');
     }
 }

@@ -8,13 +8,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\UserRepository;
 use App\Repository\OrdersRepository;
 use App\Repository\ProduitRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class DashboardController extends AbstractController
 {
     #[Route('/admin/dashboard', name: 'app_dashboard')]
-    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_ARTISAN')")]
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_ARTISAN')"))]
     public function index(UserRepository $userRepository, OrdersRepository $ordersRepository, ProduitRepository $produitRepository): Response
     {
         // Get counts for the dashboard

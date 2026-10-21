@@ -30,8 +30,8 @@ class VerificationController extends AbstractController
             }
         }
 
-        return $this->render('verification.html.twig', [
-            'error' => $this->get('session')->getFlashBag()->get('error'),
+        return $this->render('Security/verification.html.twig', [
+            'error' => $session->getFlashBag()->get('error'),
         ]);
     }
 }

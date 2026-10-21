@@ -9,5 +9,5 @@ vich_uploader:
         
         produit_image:
             uri_prefix: /uploads/produits
-            upload_destination: 'C:\Users\badii\Desktop\PI 3E\SAMAA SYMFO\aatriii\public\uploads\produits'
+            upload_destination: '%images_directory%/produits'
             namer: Vich\UploaderBundle\Naming\OrignameNamer

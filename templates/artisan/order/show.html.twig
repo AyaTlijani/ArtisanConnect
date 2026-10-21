@@ -3,7 +3,8 @@
 {% block page_title %}Commande #{{ order.orderId }}{% endblock %}
 {% block breadcrumb_active %}{{ order.orderId }}{% endblock %}
 
-{% block stylesheets %n    {{ parent() }}
+{% block stylesheets %}
+    {{ parent() }}
     <style>
         .order-details-card {
             border-left: 4px solid #6c757d;

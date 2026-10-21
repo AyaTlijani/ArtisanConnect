@@ -26,7 +26,7 @@ class Reservation
     private ?User $client = null;
 
     #[ORM\ManyToOne(targetEntity: Atelier::class)]
-    #[ORM\JoinColumn(name: 'service', referencedColumnName: 'id', nullable: true)]
+    #[ORM\JoinColumn(name: 'service', referencedColumnName: 'idAtelier', nullable: true)]
     private ?Atelier $service = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -60,17 +60,6 @@ class Reservation
         return $this->id;
     }
 
-    public function getNombrePlace(): ?int
-    {
-        return $this->nombrePlace;
-    }
-
-    public function setNombrePlace(?int $nombrePlace): self
-    {
-        $this->nombrePlace = $nombrePlace;
-
-        return $this;
-    }
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;

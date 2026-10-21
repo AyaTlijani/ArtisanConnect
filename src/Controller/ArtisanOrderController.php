@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Commande;
-use App\Entity\Livreur;
 use App\Entity\Orders;
 use App\Repository\LivreurRepository;
 use App\Repository\OrdersRepository;
@@ -32,7 +31,7 @@ class ArtisanOrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_artisan_order_show', methods: ['GET'])]
-    public function show(string $id, OrdersRepository $ordersRepository): Response
+    public function show(string $id, OrdersRepository $ordersRepository, LivreurRepository $livreurRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ARTISAN');
 
@@ -63,7 +62,7 @@ class ArtisanOrderController extends AbstractController
 
         return $this->render('artisan/order/show.html.twig', [
             'order' => $order,
-            'livreurs' => $this->getDoctrine()->getRepository(Livreur::class)->findAll(),
+            'livreurs' => $livreurRepository->findAll(),
         ]);
     }
 

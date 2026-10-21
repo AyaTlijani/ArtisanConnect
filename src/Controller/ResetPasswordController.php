@@ -17,7 +17,7 @@ class ResetPasswordController extends AbstractController
     public function index(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
         if (!$request->isMethod('POST')) {
-            return $this->render('reset_password.html.twig', [
+            return $this->render('Security/reset_password.html.twig', [
                 'error' => null,
                 'emailValue' => '',
             ]);
@@ -28,7 +28,7 @@ class ResetPasswordController extends AbstractController
 
         if (!$user) {
             $this->addFlash('error', 'No account found with this email address.');
-            return $this->render('reset_password.html.twig', [
+            return $this->render('Security/reset_password.html.twig', [
                 'error' => 'No account found with this email address.',
                 'emailValue' => $submittedEmail,
             ]);
@@ -64,7 +64,7 @@ class ResetPasswordController extends AbstractController
             return $this->redirectToRoute('app_verification');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Failed to send email: ' . $e->getMessage());
-            return $this->render('reset_password.html.twig', [
+            return $this->render('Security/reset_password.html.twig', [
                 'error' => 'Failed to send email: ' . $e->getMessage(),
                 'emailValue' => $submittedEmail,
             ]);

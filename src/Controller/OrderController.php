@@ -231,7 +231,7 @@ class OrderController extends AbstractController
         return $this->redirectToRoute('app_order_show', ['order_id' => $order->getOrderId()]);
     }
 
-    #[Route('/commandes', name: 'app_commandes_list', methods: ['GET'])]
+    #[Route('/commandes', name: 'app_commandes_list', methods: ['GET'], priority: 1)]
     public function listCommandes(CommandeRepository $commandeRepository): Response
     {
         $commandes = $commandeRepository->findAll();

@@ -23,7 +23,7 @@ class CommandeController extends AbstractController
     ): Response {
         if (!$this->isCsrfTokenValid('assign_livreur' . $commande->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid CSRF token.');
-            return $this->redirectToRoute('app_admin_orders');
+            return $this->redirectToRoute('app_orders');
         }
 
         $livreurId = $request->request->get('livreur_id');
@@ -31,7 +31,7 @@ class CommandeController extends AbstractController
 
         if (!$livreur) {
             $this->addFlash('error', 'Livreur not found.');
-            return $this->redirectToRoute('app_admin_orders');
+            return $this->redirectToRoute('app_orders');
         }
 
         $commande->setLivreur($livreur);
@@ -39,6 +39,6 @@ class CommandeController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'Livreur assigned and status updated to En livraison.');
-        return $this->redirectToRoute('app_admin_orders');
+        return $this->redirectToRoute('app_orders');
     }
 }

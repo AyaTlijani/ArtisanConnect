@@ -23,3 +23,16 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> editor / OS ###
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+###< editor / OS ###
+
+###> user uploads ###
+/public/uploads/**/*
+!/public/uploads/**/
+!/public/uploads/**/.gitkeep
+###< user uploads ###
