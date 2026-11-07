@@ -68,6 +68,8 @@ Create a `.env.local` file with your own values (it is git-ignored):
 DATABASE_URL="mysql://user:password@127.0.0.1:3306/artisan_connect?serverVersion=8.0.32&charset=utf8mb4"
 MAILER_DSN=smtp://user:password@smtp.example.com:587
 APP_SECRET=your_secret
+STRIPE_PUBLIC_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
 ```
 
 Then create the database and start the server:
